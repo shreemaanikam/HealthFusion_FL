@@ -240,6 +240,37 @@ Key variables:
 
 ---
 
+## Feature Status
+
+> **Transparency note:** Not all capabilities are fully production-ready.
+> The table below shows the honest status of each feature.
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| TensorFlow risk prediction | **ACTIVE** | Centralized NN trained and serving predictions |
+| SHAP explainability | **ACTIVE** | Local + global feature explanations |
+| FastAPI backend | **ACTIVE** | All API endpoints operational |
+| JWT authentication | **ACTIVE** | Role-based access control enforced |
+| Multi-tenancy | **ACTIVE** | Organization-scoped users and audit |
+| Audit logging | **ACTIVE** | All events tracked to database |
+| Data locality | **ACTIVE** | Raw data stays on simulated clients |
+| Federated learning (Flower) | **SIMULATION** | In-process simulation, not cross-network |
+| Adaptive aggregation | **SIMULATION** | Implemented, tested in simulation only |
+| Differential privacy | **SIMULATION** | Noise mechanism built, not yet applied to training |
+| OpenRouter AI explanation | **ACTIVE** | When `OPENROUTER_API_KEY` is configured; fallback otherwise |
+| Secure aggregation | **PLANNED** | Architecture defined, not yet implemented |
+
+---
+
+## Dataset
+
+The full dataset (100K records) is **not included** in this repository.
+A 100-row sample is provided at `data/raw/sample_data.csv` for testing.
+
+See [docs/data_setup.md](docs/data_setup.md) for download instructions.
+
+---
+
 ## Security
 
 - All secrets in `.env` (never committed)

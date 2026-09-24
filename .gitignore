@@ -18,10 +18,11 @@ build/
 venv/
 env/
 
-# Environment variables
+# Environment variables (NEVER commit secrets)
 .env
 .env.local
 .env.production
+.env.*.local
 
 # IDE
 .vscode/
@@ -35,24 +36,21 @@ env/
 Thumbs.db
 
 # Model artifacts (large binary files)
-models/baseline/*.pkl
-models/tensorflow/*.h5
-models/tensorflow/*.keras
+*.pkl
+*.joblib
+*.h5
+*.keras
+*.pb
 models/tensorflow/checkpoints/
-models/federated/*.pkl
+models/tensorflow/saved_model/
 
-# Keep model directory structure
-!models/baseline/.gitkeep
-!models/tensorflow/.gitkeep
-!models/federated/.gitkeep
-
-# Data files
+# Data files (download separately — see docs/data_setup.md)
 data/raw/*.csv
 data/processed/*.csv
 data/federated/*.csv
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/federated/.gitkeep
+
+# Keep directory structure
+!**/.gitkeep
 
 # Database
 *.db
@@ -68,6 +66,7 @@ docker-compose.override.yml
 # Coverage
 htmlcov/
 .coverage
+.coverage.*
 .pytest_cache/
 
 # Jupyter
@@ -75,4 +74,6 @@ htmlcov/
 
 # Screenshots (generated)
 screenshots/*.png
-!screenshots/.gitkeep
+
+# Reports with large data
+reports/tensorflow_training_history.csv
