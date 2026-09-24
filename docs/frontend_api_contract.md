@@ -16,7 +16,7 @@ Create a new user account.
 ```json
 {
   "email": "doctor@hospital-a.org",
-  "password": "securepassword123",
+  "password": "your-password-here",
   "full_name": "Dr. Smith",
   "role": "DOCTOR",
   "organization_id": "org-uuid-here"
@@ -43,7 +43,7 @@ Authenticate and receive JWT token.
 ```json
 {
   "email": "doctor@hospital-a.org",
-  "password": "securepassword123"
+  "password": "your-password-here"
 }
 ```
 
