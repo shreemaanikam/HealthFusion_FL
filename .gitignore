@@ -1,0 +1,78 @@
+# =====================================================
+# HealthFusion_FL - Git Ignore
+# =====================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model artifacts (large binary files)
+models/baseline/*.pkl
+models/tensorflow/*.h5
+models/tensorflow/*.keras
+models/tensorflow/checkpoints/
+models/federated/*.pkl
+
+# Keep model directory structure
+!models/baseline/.gitkeep
+!models/tensorflow/.gitkeep
+!models/federated/.gitkeep
+
+# Data files
+data/raw/*.csv
+data/processed/*.csv
+data/federated/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/federated/.gitkeep
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Screenshots (generated)
+screenshots/*.png
+!screenshots/.gitkeep
