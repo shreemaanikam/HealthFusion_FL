@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+
 
 class HealthResponse(BaseModel):
     status: str
@@ -8,6 +9,7 @@ class HealthResponse(BaseModel):
     environment: str
     services: Dict[str, str]
     timestamp: str
+
 
 class PredictionRequest(BaseModel):
     gender: str
@@ -19,6 +21,25 @@ class PredictionRequest(BaseModel):
     HbA1c_level: float
     blood_glucose_level: float
 
+    model_config = ConfigDict(populate_by_name=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_fields(cls, data: Any) -> Any:
+        """Accept camelCase field names from the frontend and normalize to snake_case."""
+        if isinstance(data, dict):
+            mapping = {
+                "heartDisease": "heart_disease",
+                "smokingHistory": "smoking_history",
+                "hba1cLevel": "HbA1c_level",
+                "bloodGlucoseLevel": "blood_glucose_level",
+            }
+            for camel, snake in mapping.items():
+                if camel in data and snake not in data:
+                    data[snake] = data.pop(camel)
+        return data
+
+
 class PredictionResponse(BaseModel):
     prediction: int
     probability: float
@@ -28,20 +49,29 @@ class PredictionResponse(BaseModel):
     explanation_available: bool
     disclaimer: str = "This is a model-predicted risk assessment, not a medical diagnosis."
 
+
 class FeatureContribution(BaseModel):
     feature: str
     impact: str
     contribution: float
     value: float
 
-class ExplainRequest(PredictionRequest):
-    pass
+
+class ExplainRequest(BaseModel):
+    """Shape the frontend actually sends: {input: {...}, predictionId?: string}."""
+
+    input: PredictionRequest
+    prediction_id: Optional[str] = Field(None, alias="predictionId")
+
+    model_config = ConfigDict(populate_by_name=True)
+
 
 class ExplainResponse(BaseModel):
     prediction: int
     probability: float
     top_features: List[FeatureContribution]
     global_importance: Optional[List[Dict[str, Any]]] = None
+
 
 class FederatedStatusResponse(BaseModel):
     status: str
@@ -51,6 +81,7 @@ class FederatedStatusResponse(BaseModel):
     strategy: str
     mode: str
     last_updated: str
+
 
 class FederatedRoundResponse(BaseModel):
     round_id: int
@@ -62,6 +93,7 @@ class FederatedRoundResponse(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime]
 
+
 class FederatedClientResponse(BaseModel):
     client_id: str
     name: str
@@ -69,6 +101,7 @@ class FederatedClientResponse(BaseModel):
     status: str
     last_seen: datetime
     total_rounds_participated: int
+
 
 class ModelVersionResponse(BaseModel):
     model_id: str
@@ -79,11 +112,24 @@ class ModelVersionResponse(BaseModel):
     status: str
     created_at: datetime
 
+
 class PrivacyStatusResponse(BaseModel):
     data_locality: str
     differential_privacy: str
     secure_aggregation: str
     audit_logging: str
+
+
+class InsightRequest(BaseModel):
+    """Payload the frontend sends to /api/insights/generate and /report."""
+
+    risk_level: Optional[str] = None
+    probability: Optional[float] = None
+    feature_contributions: Optional[List[Dict[str, Any]]] = None
+    assessment_id: Optional[str] = Field(None, alias="assessmentId")
+
+    model_config = ConfigDict(populate_by_name=True)
+
 
 class InsightResponse(BaseModel):
     risk_level: str
@@ -94,6 +140,7 @@ class InsightResponse(BaseModel):
     timestamp: str
     disclaimer: str = "This is a model-predicted risk assessment, not a medical diagnosis."
 
+
 class AuditEventResponse(BaseModel):
     id: int
     timestamp: datetime
@@ -103,6 +150,7 @@ class AuditEventResponse(BaseModel):
     object_type: str
     status: str
     metadata: Dict[str, Any]
+
 
 class ReportResponse(BaseModel):
     assessment_id: str
@@ -115,12 +163,14 @@ class ReportResponse(BaseModel):
     timestamp: str
     disclaimer: str = "This is a model-predicted risk assessment, not a medical diagnosis."
 
+
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
     role: str
     organization_id: Optional[int] = None
+
 
 class UserResponse(BaseModel):
     id: int
@@ -130,17 +180,21 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
 
+
 class OrganizationCreate(BaseModel):
     name: str
     description: str
+
 
 class OrganizationResponse(BaseModel):
     id: int
@@ -148,6 +202,7 @@ class OrganizationResponse(BaseModel):
     description: str
     is_active: bool
     created_at: datetime
+
 
 class SystemStatusResponse(BaseModel):
     app_name: str

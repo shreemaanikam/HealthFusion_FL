@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, List
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.config import get_settings
@@ -11,8 +11,8 @@ from sqlalchemy import select
 import enum
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/login")
+
 
 class RoleEnum(str, enum.Enum):
     DOCTOR = "DOCTOR"
@@ -20,11 +20,12 @@ class RoleEnum(str, enum.Enum):
     RESEARCHER = "RESEARCHER"
     SYSTEM_ADMIN = "SYSTEM_ADMIN"
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
