@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Self-hosted via @fontsource -- see app/layout.tsx. Falls back to the
+     system stack immediately if a weight somehow fails to load, rather
+     than blocking on a network font fetch the way next/font/google did. */
+  --font-display: "Manrope", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  /* HealthFusion Intelligence System -- design tokens */
+
+  /* Ink & surfaces */
+  --color-ink: #10151b;       /* primary text, near-black charcoal (warm, not pure black) */
+  --color-navy: #0e2438;      /* deep navy -- brand primary, dark surfaces */
+  --color-navy-2: #16324a;    /* lighter navy -- panels on dark */
+  --color-slate: #3e4c59;     /* secondary text */
+  --color-mist: #5f6d7a;      /* tertiary text, meta, labels */
+  --color-paper: #f4f6f7;     /* app background, cool off-white */
+  --color-line: #dde3e7;      /* hairline borders */
+  --color-surface: #ffffff;   /* cards / panels */
+
+  /* Accent -- federated intelligence */
+  --color-teal: #137574;
+  --color-teal-soft: #e4f3f1;
+
+  /* Semantic status */
+  --color-green: #2a7549;
+  --color-green-soft: #e7f5ec;
+  --color-amber: #95601a;
+  --color-amber-soft: #fbf0dd;
+  --color-red: #ab3a3a;
+  --color-red-soft: #fbeaea;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+::selection {
+  background-color: var(--color-teal-soft);
+  color: var(--color-navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hairline rule used throughout in place of card shadows/borders-on-everything */
+.hf-rule {
+  border-top: 1px solid var(--color-line);
+}
+
+.hf-focus:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+/* Numeric/data label treatment used sparingly for real measurements (not a monospace default) */
+.hf-metric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Skip-to-content link: visually hidden until keyboard-focused, so
+   keyboard users aren't forced to tab through the entire nav on every
+   page load to reach the main content. */
+.hf-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 100;
+  background: var(--color-navy);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  transition: top 0.15s ease-out;
+}
+
+.hf-skip-link:focus {
+  top: 1rem;
+}
