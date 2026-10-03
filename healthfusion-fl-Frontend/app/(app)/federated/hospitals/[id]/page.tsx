@@ -1,13 +1,22 @@
+"use client";
+
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusIndicator, hospitalStatusTone } from "@/components/ui/StatusIndicator";
+import { LoadingState } from "@/components/ui/LoadingState";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { getHospital } from "@/services/api/federated";
 import { formatPercent, relativeTime } from "@/lib/utils";
+import { useClientData } from "@/lib/useClientData";
 
-export default async function HospitalDetailPage({ params }: { params: { id: string } }) {
-  const hospital = await getHospital(params.id);
-  if (!hospital) notFound();
+export default function HospitalDetailPage({ params }: { params: { id: string } }) {
+  const state = useClientData(() => getHospital(params.id));
 
+  if (state.status === "loading") return <LoadingState label="Loading hospital" />;
+  if (state.status === "error") return <ErrorState description={state.message} />;
+  if (!state.data) return notFound();
+
+  const hospital = state.data;
   const recentParticipation = hospital.participationHistory.slice(-10);
 
   return (

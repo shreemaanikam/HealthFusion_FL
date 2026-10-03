@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,6 +8,8 @@ from app.config import get_settings
 from app.api.routes import health, prediction, explainability, federated, models, privacy, insights, audit, organizations, users
 from app.core.logging_config import get_logger
 from app.core.database import init_db
+from app.core.permissions import AUDIT_READERS, NETWORK_READERS, PRIVACY_READERS
+from app.core.security import require_role
 
 logger = get_logger(__name__)
 settings = get_settings()
@@ -56,7 +58,10 @@ async def add_security_headers(request: Request, call_next):
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    headers = {}
+    if exc.status_code == 401:
+        headers["WWW-Authenticate"] = "Bearer"
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=headers)
 
 
 @app.exception_handler(RequestValidationError)
@@ -83,8 +88,25 @@ app.include_router(users.router, prefix="/api/users")
 app.include_router(organizations.router, prefix="/api/organizations")
 app.include_router(prediction.router, prefix="/api/prediction")
 app.include_router(explainability.router, prefix="/api/explainability")
-app.include_router(federated.router, prefix="/api/federated")
-app.include_router(models.router, prefix="/api/models")
-app.include_router(privacy.router, prefix="/api/privacy")
 app.include_router(insights.router, prefix="/api/insights")
-app.include_router(audit.router, prefix="/api/audit")
+
+# ---- Protected API families: valid JWT + role required (401 / 403) ----
+# The authorization matrix lives in app/core/permissions.py and is documented in
+# docs/deployment_readiness.md. Applied at router level so routes added later to
+# these routers are protected automatically.
+app.include_router(
+    federated.router, prefix="/api/federated",
+    dependencies=[Depends(require_role(*NETWORK_READERS))],
+)
+app.include_router(
+    models.router, prefix="/api/models",
+    dependencies=[Depends(require_role(*NETWORK_READERS))],
+)
+app.include_router(
+    privacy.router, prefix="/api/privacy",
+    dependencies=[Depends(require_role(*PRIVACY_READERS))],
+)
+app.include_router(
+    audit.router, prefix="/api/audit",
+    dependencies=[Depends(require_role(*AUDIT_READERS))],
+)

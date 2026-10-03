@@ -2,13 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import timedelta
+from typing import Optional
 
 from app.core.database import get_db
+from app.core.permissions import SELF_REGISTER_ROLE, USER_PROVISIONERS
 from app.core.security import (
     get_password_hash,
     verify_password,
     create_access_token,
     get_current_user,
+    get_optional_user,
     RoleEnum,
 )
 from app.models.database_models import User, Organization
@@ -20,18 +23,35 @@ router = APIRouter(tags=["Users"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
-async def register(payload: UserCreate, db: AsyncSession = Depends(get_db)):
-    """Create a new user account."""
-    # Check email uniqueness
-    existing = await db.execute(select(User).where(User.email == payload.email))
-    if existing.scalars().first():
-        raise HTTPException(status_code=400, detail="Email address already registered.")
+async def register(
+    payload: UserCreate,
+    db: AsyncSession = Depends(get_db),
+    caller: Optional[User] = Depends(get_optional_user),
+):
+    """Create a new user account.
 
-    # Validate role
+    Anyone may self-register as DOCTOR (least privilege). Creating an account
+    with any other role requires an authenticated SYSTEM_ADMIN; otherwise
+    RBAC could be bypassed by simply registering as an administrator.
+    """
+    # Validate role first (cheap, and avoids leaking whether an email exists)
     try:
         role_enum = RoleEnum(payload.role.upper())
     except ValueError:
         raise HTTPException(status_code=422, detail=f"Invalid role '{payload.role}'. Must be one of: DOCTOR, HOSPITAL_ADMIN, RESEARCHER, SYSTEM_ADMIN.")
+
+    if role_enum != SELF_REGISTER_ROLE:
+        caller_role = getattr(caller.role, "value", None) if caller else None
+        if caller_role not in {r.value for r in USER_PROVISIONERS}:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only a system administrator can create accounts with this role.",
+            )
+
+    # Check email uniqueness
+    existing = await db.execute(select(User).where(User.email == payload.email))
+    if existing.scalars().first():
+        raise HTTPException(status_code=400, detail="Email address already registered.")
 
     user = User(
         email=payload.email,
