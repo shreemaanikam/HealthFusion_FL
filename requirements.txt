@@ -32,7 +32,12 @@ python-multipart>=0.0.9
 # ----- Database -----
 sqlalchemy>=2.0,<3.0
 alembic>=1.13,<2.0
-aiosqlite>=0.20,<1.0
+aiosqlite>=0.20,<1.0         # SQLite (dev)
+asyncpg>=0.29,<1.0           # PostgreSQL (production)
+psycopg2-binary>=2.9,<3.0   # PostgreSQL sync (Alembic migrations)
+
+# ----- Production server -----
+gunicorn>=22.0,<24.0         # WSGI wrapper for Render/Railway
 
 # ----- Authentication -----
 python-jose[cryptography]>=3.3,<4.0

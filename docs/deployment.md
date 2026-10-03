@@ -1,183 +1,127 @@
-# HealthFusion_FL — Deployment & Operations Guide
+# HealthFusion_FL — Production Deployment Guide
 
-This guide details deployment options for HealthFusion_FL, covering local development, containerized execution via Docker and Docker Compose, and zero-cost cloud deployment using free-tier services.
+> **Status:** HealthFusion_FL is a healthcare AI **research / clinical decision-support prototype**.
+> It reports *model-predicted risk*. It is not a diagnostic system, is not clinically validated,
+> and makes no regulatory-compliance claims.
+>
+> For local development and Docker Compose, see [local_development.md](local_development.md).
 
----
+## Architecture
 
-## 1. Local Development Run
-
-### 1.1 Prerequisites
-- Python 3.12+
-- Virtual environment (`venv` or `conda`)
-- SQLite (built into Python) or PostgreSQL 15+
-
-### 1.2 Setup Instructions
-
-1. **Clone and Navigate**:
-   ```bash
-   git clone https://github.com/shreemaanikam/HealthFusion_FL.git
-   cd HealthFusion_FL
-   ```
-
-2. **Initialize Virtual Environment**:
-   ```bash
-   python3.12 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-3. **Install Dependencies**:
-   ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-4. **Configure Environment Variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your local secrets
-   ```
-
-5. **Start Application**:
-   ```bash
-   # Method 1: Using the unified main launcher
-   python main.py
-
-   # Method 2: Direct Uvicorn invocation
-   cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-6. **Verify Health**:
-   Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser, or run:
-   ```bash
-   curl -s http://localhost:8000/api/health | jq .
-   ```
-
----
-
-## 2. Docker & Containerized Deployment
-
-HealthFusion_FL includes production-grade container manifests: [`Dockerfile`](file:///Users/shreemaanikam/HealthFusion_FL/Dockerfile) and [`docker-compose.yml`](file:///Users/shreemaanikam/HealthFusion_FL/docker-compose.yml).
-
-### 2.1 Dockerfile Architecture
-- **Base Image**: `python:3.12-slim` (minimal vulnerability surface).
-- **System Dependencies**: Installs `gcc` for C-extension builds and clears apt caches.
-- **Persistent Directories**: Pre-provisions directories for `models/`, `data/`, `reports/`, and `logs/`.
-- **Healthcheck Probe**: Periodically checks `http://localhost:8000/api/health` via `httpx`.
-
-```dockerfile
-FROM python:3.12-slim
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-RUN mkdir -p models/tensorflow models/preprocessors models/baseline data/processed data/federated reports logs
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD python -c "import httpx; r = httpx.get('http://localhost:8000/api/health'); r.raise_for_status()" || exit 1
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "backend"]
+```
+Browser ──HTTPS──▶ Vercel (Next.js frontend)
+                       │ HTTPS (NEXT_PUBLIC_API_BASE_URL)
+                       ▼
+                  Render (FastAPI backend)
+                   ├─ TensorFlow model (bundled, 92 KB)
+                   ├─ SHAP explainability
+                   ├─ Federated learning (SIMULATION)
+                   ├─ OpenRouter (optional, server-side)
+                   └─ PostgreSQL (Render managed)
 ```
 
-### 2.2 Docker Compose Execution
+| Name | Value |
+|------|-------|
+| `PUBLIC_URL` | `https://<your-project>.vercel.app` (assigned by Vercel on first deploy) |
+| `API_URL` | `https://<your-backend>.onrender.com` (assigned by Render on first deploy) |
+
+Users only ever need `PUBLIC_URL`. A custom domain can be attached later in either dashboard; it is not required.
+
+## 1. Deploy the backend (Render)
+
+1. Push the repo to GitHub (`shreemaanikam/HealthFusion_FL`).
+2. Render → **New → Blueprint** → select the repo. Render reads [`render.yaml`](../render.yaml) and creates the web service + PostgreSQL database.
+3. In the service's **Environment** tab, set the values marked `sync: false`:
+   - `JWT_SECRET_KEY` — `python -c "import secrets; print(secrets.token_urlsafe(48))"`
+   - `CORS_ORIGINS` — your Vercel URL, e.g. `https://your-project.vercel.app`
+   - `OPENROUTER_API_KEY` — optional
+4. Deploy. Verify: `curl https://<API_URL>/api/health`.
+
+Python is pinned to 3.12 by [`.python-version`](../.python-version) (TensorFlow 2.16 does not support 3.13+).
+`APP_ENV=production` makes the server refuse to start with a placeholder `JWT_SECRET_KEY` and hides `/docs`.
+
+> **Memory:** TensorFlow + SHAP need roughly 1 GB RAM. Render's free tier (512 MB) may be too small and may OOM
+> on first prediction. If so, use a paid instance. This is the main practical risk of a free-tier deployment.
+
+> **Cold starts:** free web services sleep after inactivity; the first request can take 30–60 s while TensorFlow loads.
+
+## 2. Deploy the frontend (Vercel)
+
+1. Vercel → **Add New → Project** → import the repo.
+2. **Root Directory:** `healthfusion-fl-Frontend`.
+3. Environment variables (Production):
+   - `NEXT_PUBLIC_DEMO_MODE=false`
+   - `NEXT_PUBLIC_API_BASE_URL=https://<API_URL>` (no trailing slash)
+4. Deploy, then copy the Vercel URL into the backend's `CORS_ORIGINS` and redeploy the backend.
+
+Only `NEXT_PUBLIC_*` values reach the browser. Never put `JWT_SECRET_KEY`, `DATABASE_URL`, or `OPENROUTER_API_KEY` there.
+
+## 3. Environment variables
+
+Backend (see [`.env.example`](../.env.example)):
+
+| Variable | Production value |
+|----------|------------------|
+| `APP_ENV` | `production` |
+| `DEBUG` | `false` |
+| `DEMO_MODE` | `false` |
+| `DATABASE_URL` | injected by Render from the managed database |
+| `JWT_SECRET_KEY` | strong random secret (dashboard only) |
+| `CORS_ORIGINS` | real frontend HTTPS origin(s) only |
+| `OPENROUTER_API_KEY` / `OPENROUTER_MODEL` | optional |
+
+Frontend (see [`.env.local.example`](../healthfusion-fl-Frontend/.env.local.example)): `NEXT_PUBLIC_DEMO_MODE`, `NEXT_PUBLIC_API_BASE_URL`.
+
+## 4. Database
+
+- Development: SQLite (`sqlite:///./healthfusion.db`).
+- Production: PostgreSQL. `postgres://` / `postgresql://` URLs are converted to `postgresql+asyncpg://` automatically.
+- Tables are created idempotently at startup (`init_db`). **Alembic migrations are not set up yet** — schema changes to an existing production database need a manual migration. Known limitation.
+- Only application data (users, organizations, audit, model metadata) is stored. No hospital datasets are uploaded.
+- Render's free PostgreSQL instance expires after a limited period; back up or upgrade for anything beyond a demo.
+
+## 5. OpenRouter
+
+Optional and server-side only. If `OPENROUTER_API_KEY` is empty or the service is unreachable, insights fall back to deterministic rule-based text; prediction and SHAP are unaffected. Free model names change over time — if requests fail, set `OPENROUTER_MODEL` to a currently available model.
+
+## 6. CORS
+
+`CORS_ORIGINS` is a comma-separated list of exact origins. Production must list only the real frontend. Allowed methods: GET/POST/PUT/PATCH/DELETE/OPTIONS; allowed headers: `Authorization`, `Content-Type`, `Accept`.
+
+## 7. Model deployment
+
+`models/tensorflow/diabetes_nn.keras` is 92 KB and is bundled in git via a `.gitignore` exception. Larger sklearn `.pkl` artifacts remain excluded. If the model grows past ~50 MB, move to Git LFS or object storage.
+
+## 8. Docker (optional, infrastructure only)
 
 ```bash
-# Build and run containerized backend
-docker-compose up --build
-
-# Run in background (detached mode)
-docker-compose up -d
-
-# View container logs
-docker-compose logs -f backend
-
-# Stop container services
-docker-compose down
+docker build -t healthfusion-backend .
+docker run --rm -p 8000:8000 --env-file .env healthfusion-backend
+curl http://localhost:8000/api/health
 ```
 
----
+The container binds to `$PORT` (default 8000) and runs as a non-root user. End users never need Docker.
 
-## 3. Free-Tier Cloud Deployment Guide
+## 9. Health checks & monitoring
 
-HealthFusion_FL is designed to run seamlessly on popular free-tier cloud platforms.
+- `GET /api/health` — liveness + real subsystem checks (model, DB round-trip, OpenRouter key). Returns `degraded` if the model or DB is unavailable.
+- `GET /api/system/status` — environment, version, model/DB/federated/OpenRouter status, uptime. No secrets or paths.
+- Logs: Render dashboard (backend) and Vercel dashboard (frontend). No paid monitoring is required.
 
-```mermaid
-graph TD
-    User["Clinician / Web Browser"] --> Frontend["Future Web Frontend\n(Deployed on Vercel / Netlify)"]
-    Frontend --> Backend["HealthFusion_FL FastAPI\n(Deployed on Render or Railway Web Service)"]
-    Backend --> DB["PostgreSQL Database\n(Hosted on Supabase Free Tier)"]
-    Backend --> ML["Local In-Memory Inference\n(TensorFlow + SHAP + Preprocessors)"]
-```
+## 10. Rollback
 
-### 3.1 Backend: Render or Railway
-- **Platform**: Render ([render.com](https://render.com)) or Railway ([railway.app](https://railway.app)).
-- **Instance Type**: Free / Hobby Tier.
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**:
-  ```bash
-  uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
-  ```
-- **Root Directory**: Project root (`/`).
+- **Frontend:** Vercel → Deployments → previous deployment → *Promote to Production*.
+- **Backend:** Render → Deploys → *Rollback*, or `git revert` and push (autoDeploy is on).
+- **Known-good tags:** `v0.1.0-backend`, `v0.2.0-integration`.
+- `init_db` is additive only, so code rollbacks are safe unless manual migrations were applied.
 
-### 3.2 Database: Supabase (PostgreSQL)
-- **Platform**: Supabase ([supabase.com](https://supabase.com)) Free Tier (includes 500MB storage and pooling).
-- **Setup**: Create a new project, copy the connection string:
-  ```text
-  postgresql+asyncpg://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-  ```
-- Set `DATABASE_URL` in your backend environment variables to this string.
+## 11. Troubleshooting
 
-### 3.3 Frontend: Vercel or Netlify
-- For future React/Next.js client portals, deploy to Vercel with zero server management.
-- Configure `NEXT_PUBLIC_API_URL` to point to the Render/Railway backend domain.
-
----
-
-## 4. Environment Variables Checklist
-
-Ensure the following variables are configured before deploying to production:
-
-| Variable | Required | Example / Recommended Setting | Description |
-| :--- | :---: | :--- | :--- |
-| `APP_NAME` | Yes | `HealthFusion_FL` | Application brand identifier |
-| `APP_ENV` | Yes | `production` (`development` for local) | Runtime environment state |
-| `DEBUG` | Yes | `false` (Never `true` in prod) | Disables detailed stack trace leakage |
-| `SECRET_KEY` | Yes | `a9f3...` (64-char random hex string) | Cryptographic signature key |
-| `DATABASE_URL` | Yes | `postgresql+asyncpg://user:pass@host:5432/db` | Async SQLAlchemy database URI |
-| `JWT_SECRET_KEY` | Yes | `7b2e...` (64-char random hex string) | Secret key for JWT signing |
-| `JWT_ALGORITHM` | Yes | `HS256` | JWT signature algorithm |
-| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Yes | `60` | Token expiration duration |
-| `CORS_ORIGINS` | Yes | `https://healthfusion.vercel.app` | Comma-separated whitelist of allowed frontends |
-| `FEDERATION_MODE` | No | `iid` or `non_iid` | Simulation federation profile |
-| `FL_NUM_ROUNDS` | No | `5` | Number of federated training rounds |
-| `FL_MIN_CLIENTS` | No | `3` | Minimum client quorum |
-| `DP_ENABLED` | No | `false` | Enable differential privacy noise injection |
-| `DP_EPSILON` | No | `1.0` | Target privacy budget |
-| `BACKEND_HOST` | Yes | `0.0.0.0` | Network binding interface |
-| `BACKEND_PORT` | Yes | `8000` | Network listening port |
-| `LOG_LEVEL` | No | `INFO` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`) |
-
----
-
-## 5. Operations & Healthcheck
-
-The deployment includes an automated healthcheck probe accessible without authentication:
-
-### Request
-```bash
-curl -X GET "http://localhost:8000/api/health"
-```
-
-### Response
-```json
-{
-  "status": "healthy",
-  "version": "1.0.0",
-  "environment": "production",
-  "services": {
-    "database": "connected",
-    "model_service": "loaded",
-    "federated_engine": "ready"
-  },
-  "timestamp": "2026-09-25T00:00:00.000000"
-}
-```
+| Symptom | Likely cause / fix |
+|---------|-------------------|
+| Browser console CORS error | `CORS_ORIGINS` doesn't exactly match the Vercel origin (scheme, no trailing slash). |
+| Frontend shows "service unavailable" | `NEXT_PUBLIC_API_BASE_URL` wrong/missing, or backend cold-starting. Rebuild the frontend after changing `NEXT_PUBLIC_*`. |
+| Backend exits at startup | `JWT_SECRET_KEY` unset in production (intended guard). |
+| `/api/health` says `degraded` | Model file missing or DB unreachable — check logs. |
+| Out-of-memory / restarts | TensorFlow needs more RAM than the free tier; upgrade the instance. |
+| `/docs` returns 404 | Intentional in production. |

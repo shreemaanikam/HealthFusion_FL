@@ -9,8 +9,10 @@
 export const DEMO_MODE: boolean =
   (process.env.NEXT_PUBLIC_DEMO_MODE ?? "true").toLowerCase() !== "false";
 
-export const API_BASE_URL: string =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL: string = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000")
+).replace(/\/+$/, "");
 
 export type DataSource = "demo" | "live";
 

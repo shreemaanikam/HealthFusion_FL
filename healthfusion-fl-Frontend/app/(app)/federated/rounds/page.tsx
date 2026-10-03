@@ -21,3 +21,6 @@ export default async function FederatedRoundsPage() {
     </div>
   );
 }
+
+// Fetches live backend data per request; must not be prerendered at build time.
+export const dynamic = "force-dynamic";

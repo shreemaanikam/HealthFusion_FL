@@ -35,7 +35,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# Model artifacts (large binary files)
+# Model artifacts (large binary files — keep excluded by default)
 *.pkl
 *.joblib
 *.h5
@@ -43,6 +43,10 @@ Thumbs.db
 *.pb
 models/tensorflow/checkpoints/
 models/tensorflow/saved_model/
+
+# EXCEPTION: the production TF model is 92 KB — safe to bundle in git.
+# sklearn .pkl files (often 80-100 MB) remain excluded.
+!models/tensorflow/diabetes_nn.keras
 
 # Data files (download separately — see docs/data_setup.md)
 data/raw/*.csv

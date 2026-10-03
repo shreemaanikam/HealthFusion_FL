@@ -51,7 +51,8 @@ class Settings(BaseSettings):
     # ----- Server -----
     BACKEND_HOST: str = "0.0.0.0"
     BACKEND_PORT: int = 8000
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    # Comma-separated list. Development default only; set explicitly in production.
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:5173"
     LOG_LEVEL: str = "INFO"
 
     model_config = SettingsConfigDict(
