@@ -1,0 +1,66 @@
+{
+  "principle": "SPLIT FIRST -> fit preprocessing on TRAIN only -> transform val/test",
+  "checks": [
+    {
+      "id": "dedup_before_split",
+      "status": "PASS",
+      "detail": "3854 exact duplicate rows removed BEFORE the split, so no identical record can sit in both train and test."
+    },
+    {
+      "id": "train_test_exact_overlap",
+      "status": "FAIL",
+      "detail": "20 identical feature-vectors shared between train and test."
+    },
+    {
+      "id": "scaler_fit_before_split",
+      "status": "FAIL (mild, documented)",
+      "detail": "src/preprocessing.py fits StandardScaler on the FULL dataset before train_test_split, so test rows contributed to the 8 scaler statistics. Max relative difference vs a train-only scaler: mean 7.98e-04, std 1.55e-03. Effect on frozen-model test ROC-AUC: 0.97529 (as trained) vs 0.97530 (train-only scaler); F1 0.5698 vs 0.5695. Kept for the frozen model; candidates use split-first.",
+      "scaler_rel_diff_mean": 0.0007978083646314748,
+      "scaler_rel_diff_std": 0.0015540188762848746,
+      "test_roc_auc_full_scaler": 0.9752922758156122,
+      "test_roc_auc_train_only_scaler": 0.975302834815808
+    },
+    {
+      "id": "label_encoder_fit_before_split",
+      "status": "PASS (benign)",
+      "detail": "Encoder fit on full data; unseen test categories vs train: {'gender': [], 'smoking_history': []}. Codes are alphabetical and fixed in the artifact."
+    },
+    {
+      "id": "target_leakage_in_features",
+      "status": "NOTE",
+      "detail": "No feature is derived from the label. HOWEVER HbA1c and blood glucose are themselves diagnostic criteria for diabetes, so very high discrimination is expected and the task is closer to detection than to prospective risk prediction. Do not present performance as early-risk forecasting."
+    },
+    {
+      "id": "early_stopping_validation_reuse",
+      "status": "NOTE",
+      "detail": "Keras validation_split took the LAST 15% of train.csv, used for early stopping / best-epoch selection. These rows were never trained on but did influence model selection; they are used here for calibration + threshold selection, never for reporting test metrics."
+    },
+    {
+      "id": "patient_level_duplication",
+      "status": "NOT VERIFIABLE",
+      "detail": "The dataset has no patient identifier; repeated visits by one patient cannot be detected or excluded."
+    },
+    {
+      "id": "random_seed",
+      "status": "PASS (partial)",
+      "detail": "Split seed=42 reproduced bit-for-bit. TF weights seeded with 42 in create_model; GPU/CPU non-determinism not fully controlled."
+    }
+  ],
+  "split_reproduction": {
+    "status": "PASS",
+    "max_abs_diff_train": 4.6009221854603766e-07,
+    "max_abs_diff_test": 4.0436055392945036e-07,
+    "labels_match": true,
+    "train_rows": 76916,
+    "test_rows": 19230
+  },
+  "split_sizes": {
+    "deduplicated": 96146,
+    "train_total": 76916,
+    "train_fit": 65378,
+    "validation": 11538,
+    "test": 19230
+  },
+  "test_positive_rate": 0.08819552782111284,
+  "train_positive_rate": 0.08822611680274585
+}

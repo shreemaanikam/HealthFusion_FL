@@ -87,9 +87,9 @@ export default function AssessmentPage() {
     <div>
       <PageHeader
         eyebrow="Patient care"
-        title="New assessment"
-        description="Model-predicted diabetes risk — clinical decision support, not a diagnosis."
-        action={<FeatureStatusBadge status="demo" />}
+        title="New assessment — evaluated by the trained model"
+        description="This input does not need to have been part of model training. It applies the exact same preprocessing used during training (scaling, encoding) and performs a forward pass to generate a prediction."
+        action={<FeatureStatusBadge status={DEMO_MODE ? "demo" : "active"} />}
       />
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-10 px-4 py-8 sm:px-6">

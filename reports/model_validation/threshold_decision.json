@@ -1,0 +1,32 @@
+{
+  "candidates_evaluated": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95
+  ],
+  "best_threshold_by_validation_f1": 0.45,
+  "val_f1_at_best": 0.7859237536656891,
+  "val_f1_at_0.5": 0.7856716417910448,
+  "test_f1_at_best": 0.810403832991102,
+  "test_f1_at_0.5": 0.8087318087318087,
+  "rule": "Move off 0.5 only if validation F1 improves by >=0.01 AND test F1 is not worse by >0.005.",
+  "justified_change": false,
+  "operational_threshold": 0.5,
+  "disclaimer": "Operating threshold is chosen on statistical validation only; it is not clinically optimal or clinically validated."
+}

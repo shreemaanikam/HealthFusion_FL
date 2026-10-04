@@ -16,7 +16,17 @@ export default function NotificationsPage() {
       <div className="p-6">
         {state.status === "loading" && <LoadingState label="Loading notifications" />}
         {state.status === "error" && <ErrorState description={state.message} />}
-        {state.status === "ok" && (
+        {state.status === "forbidden" && (
+            <div className="bg-surface border border-line rounded-lg p-8 text-center text-slate">
+                No new notifications.
+            </div>
+        )}
+        {state.status === "ok" && state.data.length === 0 && (
+            <div className="bg-surface border border-line rounded-lg p-8 text-center text-slate">
+                No new notifications.
+            </div>
+        )}
+        {state.status === "ok" && state.data.length > 0 && (
           <ul className="divide-y divide-line rounded border border-line bg-surface">
             {state.data.slice(0, 5).map((n) => (
               <li key={n.id} className="px-5 py-4">

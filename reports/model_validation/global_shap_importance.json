@@ -1,0 +1,50 @@
+{
+  "method": "mean |exact Shapley value| over 200 random held-out test rows, 50-row training background",
+  "units": "calibrated probability",
+  "seed": 42,
+  "n_explained": 200,
+  "n_background": 50,
+  "model_version": "HF-NN-v1.0",
+  "features": [
+    {
+      "feature": "HbA1c_level",
+      "importance": 0.08676755961737367,
+      "mean_signed": -0.018585539226336555
+    },
+    {
+      "feature": "blood_glucose_level",
+      "importance": 0.05726776376618634,
+      "mean_signed": -0.015819243591470335
+    },
+    {
+      "feature": "age",
+      "importance": 0.019507320215416468,
+      "mean_signed": 0.0011309405820029872
+    },
+    {
+      "feature": "bmi",
+      "importance": 0.010483247959539692,
+      "mean_signed": -0.0017718699511367552
+    },
+    {
+      "feature": "heart_disease",
+      "importance": 0.004613635969283859,
+      "mean_signed": -0.0029261356222816236
+    },
+    {
+      "feature": "smoking_history",
+      "importance": 0.003933545986043236,
+      "mean_signed": -0.0015586709543215429
+    },
+    {
+      "feature": "gender",
+      "importance": 0.003458203834022404,
+      "mean_signed": -0.0003871126373016809
+    },
+    {
+      "feature": "hypertension",
+      "importance": 0.002626260858942363,
+      "mean_signed": 0.0006804880186813134
+    }
+  ]
+}

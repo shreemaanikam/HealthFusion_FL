@@ -1,0 +1,50 @@
+{
+  "model_id": "hf-nn-v1",
+  "model_version": "HF-NN-v1.0",
+  "artifact": "models/tensorflow/diabetes_nn.keras",
+  "artifact_sha256": "2453fb8f95637e9c39f29b2559911f8a00dd8154861a1d61355b028b6eb4158a",
+  "preprocessing_version": "pp-v1",
+  "preprocessing_artifact": "models/preprocessors/preprocessing_v1.json",
+  "feature_order": [
+    "gender",
+    "age",
+    "hypertension",
+    "heart_disease",
+    "smoking_history",
+    "bmi",
+    "HbA1c_level",
+    "blood_glucose_level"
+  ],
+  "target": "diabetes",
+  "dataset": {
+    "file": "diabetes_prediction_dataset.csv",
+    "sha256": "f233fc470e904201f35310d061cb46ca0a6bc7ca5c3e428b769fb4f87f69929b",
+    "rows_raw": 100000,
+    "rows_after_dedup": 96146
+  },
+  "seeds": {
+    "split": 42,
+    "bootstrap": 42,
+    "candidates": 42,
+    "shap_sampling": 42,
+    "tf_create_model": 42
+  },
+  "split": {
+    "deduplicated": 96146,
+    "train_total": 76916,
+    "train_fit": 65378,
+    "validation": 11538,
+    "test": 19230
+  },
+  "versions": {
+    "python": "3.12.3",
+    "tensorflow": "2.16.2",
+    "numpy": "1.26.4",
+    "pandas": "3.0.6",
+    "scikit_learn": "1.9.1",
+    "scipy": "1.17.1",
+    "platform": "macOS-26.7-x86_64-i386-64bit"
+  },
+  "generated_at_utc": "2026-10-04T19:02:56.648132+00:00",
+  "pipeline": "python -m src.validation.run_validation"
+}

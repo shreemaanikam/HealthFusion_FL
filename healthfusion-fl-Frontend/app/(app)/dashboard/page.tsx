@@ -32,7 +32,19 @@ function useDashboardData() {
     return { status: "loading" as const };
   }
 
-  return { status: "ok" as const, federated: federated.data, models: models.data, privacy: privacy.data };
+  // Gracefully degrade for DOCTOR (403 forbidden)
+  const isDoctor = federated.status === "forbidden" || models.status === "forbidden" || privacy.status === "forbidden";
+
+  if (isDoctor) {
+      return { status: "doctor_dashboard" as const };
+  }
+
+  return { 
+      status: "ok" as const, 
+      federated: federated.status === "ok" ? federated.data : null, 
+      models: models.status === "ok" ? models.data : null, 
+      privacy: privacy.status === "ok" ? privacy.data : null 
+  };
 }
 
 export default function DashboardPage() {
@@ -48,8 +60,28 @@ export default function DashboardPage() {
 
       {state.status === "loading" && <LoadingState label="Loading dashboard" />}
       {state.status === "error" && <ErrorState description={state.message} />}
+      {state.status === "doctor_dashboard" && (
+          <div className="p-6 max-w-4xl">
+             <div className="bg-surface border border-line rounded-lg p-8 text-center space-y-4">
+                 <h2 className="text-xl font-semibold text-ink">Welcome to HealthFusion</h2>
+                 <p className="text-slate max-w-lg mx-auto">
+                    You are logged in as a Doctor. From the left navigation menu, you can perform new clinical assessments, review your assessment history, and access clinical insights.
+                 </p>
+                 <div className="flex justify-center gap-4 mt-6">
+                     <Link href="/assessment" className="px-4 py-2 bg-teal text-white rounded font-medium hover:bg-teal/90">
+                         New Assessment
+                     </Link>
+                     <Link href="/assessment/history" className="px-4 py-2 bg-surface text-ink border border-line rounded font-medium hover:bg-line/50">
+                         View History
+                     </Link>
+                 </div>
+             </div>
+          </div>
+      )}
+
       {state.status === "ok" && (() => {
         const { federated, models, privacy } = state;
+        if (!federated || !models || !privacy) return null;
         const currentModel = models.versions.find((v) => v.version === models.currentModelVersion);
         const networkTone = federated.networkHealth === "healthy" ? "green" : federated.networkHealth === "attention" ? "amber" : "red";
         const activeControls = privacy.controls.filter((c) => c.status === "active").length;

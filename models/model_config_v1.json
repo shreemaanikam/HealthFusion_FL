@@ -1,0 +1,23 @@
+{
+  "model_id": "hf-nn-v1",
+  "model_version": "HF-NN-v1.0",
+  "model_sha256": "2453fb8f95637e9c39f29b2559911f8a00dd8154861a1d61355b028b6eb4158a",
+  "preprocessing_version": "pp-v1",
+  "score_semantics": "calibrated_probability",
+  "calibration": {
+    "type": "platt_on_logit",
+    "a": 1.0849583608697029,
+    "b": -2.4140025941794523,
+    "fit_on": "held-out validation split (last 15% of train.csv)",
+    "fit_rows": 11538
+  },
+  "threshold": 0.5,
+  "risk_bands": {
+    "low_max": 0.3,
+    "high_min": 0.7,
+    "note": "Display categories on the reported score; observed test rates per band are in the model card."
+  },
+  "explanation_units": "calibrated probability",
+  "generated_from": "reports/model_validation/model_validation_summary.json",
+  "disclaimer": "Statistical operating point; not clinically validated."
+}

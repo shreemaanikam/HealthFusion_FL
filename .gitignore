@@ -81,3 +81,4 @@ screenshots/*.png
 
 # Reports with large data
 reports/tensorflow_training_history.csv
+.keras_home/

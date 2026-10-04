@@ -92,7 +92,21 @@ export async function getAssessmentResult(id: string): Promise<AssessmentResult 
 
 export async function getAssessmentHistory(): Promise<AssessmentHistoryItem[]> {
   if (DEMO_MODE) return demoAssessmentHistory;
-  // No GET /api/assessment/history in the contract -- see the History page,
-  // which is explicit that this is session-only, not a persisted server record.
-  return getSessionResultsAsHistory();
+  
+  try {
+    const data = await apiFetch<any[]>("/api/assessments");
+    return data.map(item => ({
+      id: String(item.id),
+      patientRef: `PT-${item.id}`,
+      createdAt: item.createdAt,
+      riskLevel: item.riskLevel,
+      probability: item.probability,
+      confidence: item.probability,
+      modelVersion: "v1.0.0", // from DB or default
+      status: "completed"
+    }));
+  } catch (err) {
+    console.error("Failed to fetch assessment history", err);
+    return [];
+  }
 }

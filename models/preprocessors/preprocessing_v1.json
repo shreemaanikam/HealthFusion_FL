@@ -1,0 +1,82 @@
+{
+  "version": "pp-v1",
+  "description": "Frozen preprocessing for model HF-NN-v1.0 (reproduces src/preprocessing.py).",
+  "feature_order": [
+    "gender",
+    "age",
+    "hypertension",
+    "heart_disease",
+    "smoking_history",
+    "bmi",
+    "HbA1c_level",
+    "blood_glucose_level"
+  ],
+  "categorical_maps": {
+    "gender": {
+      "Female": 0,
+      "Male": 1,
+      "Other": 2
+    },
+    "smoking_history": {
+      "No Info": 0,
+      "current": 1,
+      "ever": 2,
+      "former": 3,
+      "never": 4,
+      "not current": 5
+    }
+  },
+  "numeric_features": [
+    "age",
+    "bmi",
+    "HbA1c_level",
+    "blood_glucose_level"
+  ],
+  "scaler": {
+    "type": "StandardScaler",
+    "mean": [
+      41.79432571297817,
+      27.32146111122668,
+      5.532608740873255,
+      138.21823060761758
+    ],
+    "scale": [
+      22.46283076025594,
+      6.7676803653959965,
+      1.073226444367851,
+      40.90955861402227
+    ],
+    "fit_rows": 96146
+  },
+  "training_ranges": {
+    "age": {
+      "min": 0.08,
+      "max": 80.0
+    },
+    "bmi": {
+      "min": 10.01,
+      "max": 95.69
+    },
+    "HbA1c_level": {
+      "min": 3.5,
+      "max": 9.0
+    },
+    "blood_glucose_level": {
+      "min": 80.0,
+      "max": 300.0
+    }
+  },
+  "source": {
+    "file": "diabetes_prediction_dataset.csv",
+    "sha256": "f233fc470e904201f35310d061cb46ca0a6bc7ca5c3e428b769fb4f87f69929b",
+    "rows_raw": 100000,
+    "rows_after_dedup": 96146,
+    "note": "Scaler was fit on the full de-duplicated dataset BEFORE the train/test split (a documented mild leakage of 8 summary statistics; kept so the frozen model receives the exact inputs it was trained on)."
+  },
+  "verification": {
+    "against": "data/processed/processed_dataset.csv",
+    "max_abs_diff": 4.6009221854603766e-07,
+    "rows": 96146,
+    "status": "PASS"
+  }
+}

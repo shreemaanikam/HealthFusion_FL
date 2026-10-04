@@ -1,0 +1,149 @@
+{
+  "rows": 100000,
+  "columns": 9,
+  "feature_names": [
+    "gender",
+    "age",
+    "hypertension",
+    "heart_disease",
+    "smoking_history",
+    "bmi",
+    "HbA1c_level",
+    "blood_glucose_level",
+    "diabetes"
+  ],
+  "dtypes": {
+    "gender": "str",
+    "age": "float64",
+    "hypertension": "int64",
+    "heart_disease": "int64",
+    "smoking_history": "str",
+    "bmi": "float64",
+    "HbA1c_level": "float64",
+    "blood_glucose_level": "int64",
+    "diabetes": "int64"
+  },
+  "missing_values": {
+    "gender": 0,
+    "age": 0,
+    "hypertension": 0,
+    "heart_disease": 0,
+    "smoking_history": 0,
+    "bmi": 0,
+    "HbA1c_level": 0,
+    "blood_glucose_level": 0,
+    "diabetes": 0
+  },
+  "duplicate_rows": 3854,
+  "duplicate_pct": 3.854,
+  "target_balance": {
+    "0": 91500,
+    "1": 8500
+  },
+  "target_positive_rate": 0.085,
+  "class_imbalance_ratio_neg_to_pos": 10.764705882352942,
+  "categorical_values": {
+    "gender": {
+      "Female": 58552,
+      "Male": 41430,
+      "Other": 18
+    },
+    "smoking_history": {
+      "No Info": 35816,
+      "never": 35095,
+      "former": 9352,
+      "current": 9286,
+      "not current": 6447,
+      "ever": 4004
+    }
+  },
+  "numeric_ranges": {
+    "age": {
+      "min": 0.08,
+      "max": 80.0,
+      "mean": 41.885856,
+      "std": 22.516839871617023
+    },
+    "bmi": {
+      "min": 10.01,
+      "max": 95.69,
+      "mean": 27.3207671,
+      "std": 6.636783416648369
+    },
+    "HbA1c_level": {
+      "min": 3.5,
+      "max": 9.0,
+      "mean": 5.527507,
+      "std": 1.0706720918835437
+    },
+    "blood_glucose_level": {
+      "min": 80.0,
+      "max": 300.0,
+      "mean": 138.05806,
+      "std": 40.708136048704134
+    }
+  },
+  "suspicious": {
+    "bmi_exactly_27.32": 25495,
+    "bmi_exactly_27.32_note": "A single BMI value over-represented; consistent with imputation in the public dataset.",
+    "age_under_1": 911,
+    "age_under_18": 17219,
+    "bmi_over_60": 115,
+    "gender_other": 18,
+    "smoking_no_info_pct": 35.82,
+    "hba1c_distinct_values": [
+      3.5,
+      4.0,
+      4.5,
+      4.8,
+      5.0,
+      5.7,
+      5.8,
+      6.0,
+      6.1,
+      6.2,
+      6.5,
+      6.6,
+      6.8,
+      7.0,
+      7.5,
+      8.2,
+      8.8,
+      9.0
+    ],
+    "glucose_distinct_values": [
+      80,
+      85,
+      90,
+      100,
+      126,
+      130,
+      140,
+      145,
+      155,
+      158,
+      159,
+      160,
+      200,
+      220,
+      240,
+      260,
+      280,
+      300
+    ],
+    "non_integer_ages": 2018
+  },
+  "file_hash_comparison": {
+    "primary": {
+      "file": "diabetes_prediction_dataset.csv",
+      "sha256": "f233fc470e904201f35310d061cb46ca0a6bc7ca5c3e428b769fb4f87f69929b"
+    },
+    "copy": {
+      "file": "diabetes_prediction_dataset (2).csv",
+      "sha256": "f233fc470e904201f35310d061cb46ca0a6bc7ca5c3e428b769fb4f87f69929b"
+    },
+    "identical": true,
+    "data_raw_copy_identical": true
+  },
+  "independence": "NOT independent: the uploaded CSVs are byte-identical to each other and to the training source (data/raw). They are the original dataset, not external validation data."
+}

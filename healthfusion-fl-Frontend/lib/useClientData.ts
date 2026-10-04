@@ -1,44 +1,38 @@
-"use client";
-/**
- * useClientData — fetch backend data inside a client component.
- *
- * Why client-side fetching for protected pages:
- *   The JWT lives in sessionStorage (set after login by lib/token.ts). Server
- *   Components running in Next.js SSR have no access to sessionStorage, so any
- *   API call they make would be anonymous — which now correctly returns 401.
- *
- *   By fetching inside a Client Component, the call happens in the browser
- *   after AuthGate has confirmed the session, so apiFetch() automatically
- *   attaches Authorization: Bearer <token> from lib/token.ts.
- */
 import { useState, useEffect } from "react";
+import { ApiError } from "@/services/api/client";
+import { DEMO_MODE } from "./demo-mode";
 
-export type AsyncState<T> =
+export type ClientDataState<T> =
   | { status: "loading" }
   | { status: "error"; message: string }
+  | { status: "forbidden"; message: string }
   | { status: "ok"; data: T };
 
-export function useClientData<T>(fetcher: () => Promise<T>): AsyncState<T> {
-  const [state, setState] = useState<AsyncState<T>>({ status: "loading" });
+export function useClientData<T>(fetcher: () => Promise<T>): ClientDataState<T> {
+  const [state, setState] = useState<ClientDataState<T>>({ status: "loading" });
 
   useEffect(() => {
-    let cancelled = false;
-    setState({ status: "loading" });
+    let active = true;
     fetcher()
       .then((data) => {
-        if (!cancelled) setState({ status: "ok", data });
+        if (active) setState({ status: "ok", data });
       })
-      .catch((err: unknown) => {
-        if (!cancelled)
+      .catch((err) => {
+        if (!active) return;
+        if (err instanceof ApiError && err.status === 403) {
+          setState({ status: "forbidden", message: err.message });
+        } else {
           setState({
             status: "error",
-            message: err instanceof Error ? err.message : "Failed to load data.",
+            message: err instanceof Error ? err.message : "An error occurred while loading data",
           });
+        }
       });
+
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetcher]);
 
   return state;
 }

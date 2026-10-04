@@ -14,6 +14,7 @@ export default function HospitalDetailPage({ params }: { params: { id: string } 
 
   if (state.status === "loading") return <LoadingState label="Loading hospital" />;
   if (state.status === "error") return <ErrorState description={state.message} />;
+  if (state.status === "forbidden") return <ErrorState description={state.message} />;
   if (!state.data) return notFound();
 
   const hospital = state.data;
@@ -81,7 +82,7 @@ export default function HospitalDetailPage({ params }: { params: { id: string } 
       <section className="bg-surface p-6">
         <h2 className="font-display text-base font-semibold text-ink">Recent participation</h2>
         <div className="mt-4 flex items-end gap-1.5">
-          {recentParticipation.map((p) => (
+          {recentParticipation.map((p: any) => (
             <div key={p.round} className="flex flex-1 flex-col items-center gap-1.5">
               <div
                 className={`w-full rounded-sm ${p.participated ? "bg-teal" : "bg-line"}`}

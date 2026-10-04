@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import get_settings
-from app.api.routes import health, prediction, explainability, federated, models, privacy, insights, audit, organizations, users
+from app.api.routes import health, prediction, explainability, federated, models, privacy, insights, audit, organizations, users, assessments
 from app.core.logging_config import get_logger
 from app.core.database import init_db
 from app.core.permissions import AUDIT_READERS, NETWORK_READERS, PRIVACY_READERS
@@ -89,6 +89,7 @@ app.include_router(organizations.router, prefix="/api/organizations")
 app.include_router(prediction.router, prefix="/api/prediction")
 app.include_router(explainability.router, prefix="/api/explainability")
 app.include_router(insights.router, prefix="/api/insights")
+app.include_router(assessments.router, prefix="/api/assessments")
 
 # ---- Protected API families: valid JWT + role required (401 / 403) ----
 # The authorization matrix lives in app/core/permissions.py and is documented in

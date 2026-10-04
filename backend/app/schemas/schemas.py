@@ -41,6 +41,7 @@ class PredictionRequest(BaseModel):
 
 
 class PredictionResponse(BaseModel):
+    id: Optional[int] = None
     prediction: int
     probability: float
     risk_level: str

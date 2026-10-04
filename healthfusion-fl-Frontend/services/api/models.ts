@@ -36,3 +36,11 @@ export async function getModelRegistry(): Promise<ModelRegistrySnapshot> {
     source: "live",
   };
 }
+
+export async function getModelValidationReport(): Promise<any> {
+  if (DEMO_MODE) {
+    // Return mock for demo
+    return { status_labels: { external_validation: "PENDING" }, test_metrics: { accuracy: 0.95 } };
+  }
+  return apiFetch<any>("/api/models/validation_report");
+}

@@ -1,0 +1,260 @@
+{
+  "model": {
+    "id": "hf-nn-v1",
+    "version": "HF-NN-v1.0",
+    "type": "Neural network (TensorFlow/Keras)",
+    "sha256": "2453fb8f95637e9c39f29b2559911f8a00dd8154861a1d61355b028b6eb4158a",
+    "training_mode": "centralized (a federated simulation exists separately; this artifact is NOT a federated global model)"
+  },
+  "status_labels": {
+    "internal_validation": "VALIDATED",
+    "cross_validation": "NOT RUN",
+    "calibration": "VALIDATED",
+    "external_validation": "PENDING",
+    "federated_learning": "SIMULATION"
+  },
+  "score_semantics": "calibrated_probability",
+  "operating_threshold": 0.5,
+  "test_metrics": {
+    "n": 19230,
+    "prevalence": 0.08819552782111284,
+    "threshold": 0.5,
+    "accuracy": 0.9712948517940717,
+    "precision": 0.980672268907563,
+    "recall": 0.6880896226415094,
+    "specificity": 0.9986882628036957,
+    "f1": 0.8087318087318087,
+    "mcc": 0.8083100526828435,
+    "tn": 17511,
+    "fp": 23,
+    "fn": 529,
+    "tp": 1167,
+    "roc_auc": 0.9752922758156122,
+    "pr_auc": 0.8772129835013623
+  },
+  "test_metrics_ci95": {
+    "accuracy": {
+      "lower": 0.9690834633385336,
+      "upper": 0.9737389495579823,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "precision": {
+      "lower": 0.9724615824067181,
+      "upper": 0.9882799696935682,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "recall": {
+      "lower": 0.6696858602985093,
+      "upper": 0.7102546222145125,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "specificity": {
+      "lower": 0.9981236621676788,
+      "upper": 0.9992019356660025,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "f1": {
+      "lower": 0.7940139763319912,
+      "upper": 0.8242661251791686,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "roc_auc": {
+      "lower": 0.9727281824498636,
+      "upper": 0.9778435557452855,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    },
+    "pr_auc": {
+      "lower": 0.8659463430244124,
+      "upper": 0.8891743372411581,
+      "n_boot": 300,
+      "seed": 42,
+      "method": "percentile bootstrap over test rows"
+    }
+  },
+  "metrics_by_split": {
+    "train_fit_thr0.5": {
+      "n": 65378,
+      "prevalence": 0.08839364923980544,
+      "threshold": 0.5,
+      "accuracy": 0.8796690018048885,
+      "precision": 0.4196304849884527,
+      "recall": 0.943242775566707,
+      "specificity": 0.8735045890031712,
+      "f1": 0.5808514039107038,
+      "mcc": 0.5810494447346912,
+      "tn": 52060,
+      "fp": 7539,
+      "fn": 328,
+      "tp": 5451,
+      "roc_auc": 0.9780782183293355,
+      "pr_auc": 0.8858093008523068
+    },
+    "validation_thr0.5": {
+      "n": 11538,
+      "prevalence": 0.08727682440630959,
+      "threshold": 0.5,
+      "accuracy": 0.8866354654186167,
+      "precision": 0.4310581768208887,
+      "recall": 0.9344587884806356,
+      "specificity": 0.882062482195423,
+      "f1": 0.5899686520376175,
+      "mcc": 0.5883940611950642,
+      "tn": 9289,
+      "fp": 1242,
+      "fn": 66,
+      "tp": 941,
+      "roc_auc": 0.9778324588954143,
+      "pr_auc": 0.8785641700607033
+    },
+    "test_thr0.5": {
+      "n": 19230,
+      "prevalence": 0.08819552782111284,
+      "threshold": 0.5,
+      "accuracy": 0.8750910036401456,
+      "precision": 0.40920781893004116,
+      "recall": 0.9380896226415094,
+      "specificity": 0.8689973765256074,
+      "f1": 0.5698424068767909,
+      "mcc": 0.569861949319832,
+      "tn": 15237,
+      "fp": 2297,
+      "fn": 105,
+      "tp": 1591,
+      "roc_auc": 0.9752922758156122,
+      "pr_auc": 0.8772129835013625
+    }
+  },
+  "calibration": {
+    "test_raw_model_score": {
+      "brier": 0.0727069836051045,
+      "ece_10bin": 0.11533439611584602,
+      "log_loss": 0.2097203321876417
+    },
+    "test_platt_calibrated": {
+      "brier": 0.024051734165931964,
+      "ece_10bin": 0.005542744389413198,
+      "log_loss": 0.08577140963201323
+    },
+    "decision": "ADOPT_CALIBRATED_PROBABILITY",
+    "score_saturation": {
+      "pct_test_scores_gt_0.99": 5.912636505460219,
+      "pct_test_scores_lt_0.01": 54.12896515860635,
+      "pct_test_scores_between_0.1_and_0.9": 29.98439937597504
+    },
+    "adopted": true
+  },
+  "threshold": {
+    "candidates_evaluated": [
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95
+    ],
+    "best_threshold_by_validation_f1": 0.45,
+    "val_f1_at_best": 0.7859237536656891,
+    "val_f1_at_0.5": 0.7856716417910448,
+    "test_f1_at_best": 0.810403832991102,
+    "test_f1_at_0.5": 0.8087318087318087,
+    "rule": "Move off 0.5 only if validation F1 improves by >=0.01 AND test F1 is not worse by >0.005.",
+    "justified_change": false,
+    "operational_threshold": 0.5,
+    "disclaimer": "Operating threshold is chosen on statistical validation only; it is not clinically optimal or clinically validated."
+  },
+  "risk_band_observed_rates_test": {
+    "low": {
+      "n": 17665,
+      "observed_diabetes_rate": 0.0238324370223606
+    },
+    "moderate": {
+      "n": 419,
+      "observed_diabetes_rate": 0.31026252983293556
+    },
+    "high": {
+      "n": 1146,
+      "observed_diabetes_rate": 0.9991273996509599
+    }
+  },
+  "subgroups_flagged": [
+    {
+      "group": "gender",
+      "level": "Other",
+      "n": 4,
+      "flag": "insufficient sample/positives for stable metrics"
+    }
+  ],
+  "comparison": [
+    {
+      "model": "HF-NN-v1.0 (production TF, frozen)",
+      "role": "production",
+      "accuracy": 0.9712948517940717,
+      "precision": 0.980672268907563,
+      "recall": 0.6880896226415094,
+      "specificity": 0.9986882628036957,
+      "f1": 0.8087318087318087,
+      "mcc": 0.8083100526828435,
+      "roc_auc": 0.9752922758156122,
+      "pr_auc": 0.8772129835013623,
+      "brier": 0.024051734165931964,
+      "ece": 0.005542744389413198,
+      "threshold": 0.5
+    }
+  ],
+  "promotion_decisions": [],
+  "cross_validation_summary": [],
+  "leakage": {
+    "dedup_before_split": "PASS",
+    "train_test_exact_overlap": "FAIL",
+    "scaler_fit_before_split": "FAIL (mild, documented)",
+    "label_encoder_fit_before_split": "PASS (benign)",
+    "target_leakage_in_features": "NOTE",
+    "early_stopping_validation_reuse": "NOTE",
+    "patient_level_duplication": "NOT VERIFIABLE",
+    "random_seed": "PASS (partial)"
+  },
+  "serialization": {
+    "status": "PASS",
+    "max_abs_score_diff": 0.0,
+    "rows_compared": 5000,
+    "tolerance": 1e-05,
+    "artifact": "models/tensorflow/diabetes_nn.keras",
+    "artifact_sha256": "2453fb8f95637e9c39f29b2559911f8a00dd8154861a1d61355b028b6eb4158a"
+  },
+  "logit_sigmoid_consistency_max_abs": 1.3980111412958962e-07,
+  "internal_drift_train_vs_test": {
+    "max_psi": 0.0008510057312302107,
+    "reading": "little shift"
+  },
+  "external_validation": {
+    "status": "PENDING",
+    "reason": "No independent dataset with compatible semantics is available; the supplied CSVs are byte-identical to the training source."
+  },
+  "generated_at_utc": "2026-10-04T19:02:56.648132+00:00",
+  "runtime_seconds": 101.6
+}

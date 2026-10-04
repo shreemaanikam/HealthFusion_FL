@@ -1,0 +1,185 @@
+{
+  "method_evaluated": "Platt scaling on pre-sigmoid logits, fit on the held-out validation split (never on test)",
+  "platt": {
+    "a": 1.0849583608697029,
+    "b": -2.4140025941794523,
+    "fit_rows": 11538
+  },
+  "test_raw_model_score": {
+    "brier": 0.0727069836051045,
+    "ece_10bin": 0.11533439611584602,
+    "log_loss": 0.2097203321876417
+  },
+  "test_platt_calibrated": {
+    "brier": 0.024051734165931964,
+    "ece_10bin": 0.005542744389413198,
+    "log_loss": 0.08577140963201323
+  },
+  "test_isotonic_reference": {
+    "brier": 0.024179474928215358,
+    "ece_10bin": 0.005266306116707078,
+    "log_loss": 0.08686002486296965
+  },
+  "validation_raw_model_score": {
+    "brier": 0.0656588774890352,
+    "ece_10bin": 0.10401850179933302,
+    "log_loss": 0.1916714503563298
+  },
+  "relative_improvement_platt_vs_raw": {
+    "brier": 0.6691963691333307,
+    "ece": 0.951941965484036
+  },
+  "decision_rule": "Adopt calibrated probability for display only if Platt improves BOTH test Brier and test ECE by >=10% relative; otherwise the output is labelled 'model score' and NOT presented as a probability.",
+  "adopted": true,
+  "decision": "ADOPT_CALIBRATED_PROBABILITY",
+  "score_saturation": {
+    "pct_test_scores_gt_0.99": 5.912636505460219,
+    "pct_test_scores_lt_0.01": 54.12896515860635,
+    "pct_test_scores_between_0.1_and_0.9": 29.98439937597504
+  },
+  "reliability_raw": [
+    {
+      "bin_low": 0.0,
+      "bin_high": 0.1,
+      "count": 12265,
+      "mean_predicted": 0.010042633424317979,
+      "observed_rate": 0.0008968609865470852
+    },
+    {
+      "bin_low": 0.1,
+      "bin_high": 0.2,
+      "count": 1374,
+      "mean_predicted": 0.14157774350897367,
+      "observed_rate": 0.013100436681222707
+    },
+    {
+      "bin_low": 0.2,
+      "bin_high": 0.30000000000000004,
+      "count": 675,
+      "mean_predicted": 0.24748616370889875,
+      "observed_rate": 0.04296296296296296
+    },
+    {
+      "bin_low": 0.30000000000000004,
+      "bin_high": 0.4,
+      "count": 545,
+      "mean_predicted": 0.3487513825980895,
+      "observed_rate": 0.045871559633027525
+    },
+    {
+      "bin_low": 0.4,
+      "bin_high": 0.5,
+      "count": 483,
+      "mean_predicted": 0.44669365321380505,
+      "observed_rate": 0.045548654244306416
+    },
+    {
+      "bin_low": 0.5,
+      "bin_high": 0.6000000000000001,
+      "count": 688,
+      "mean_predicted": 0.5552060784295548,
+      "observed_rate": 0.10174418604651163
+    },
+    {
+      "bin_low": 0.6000000000000001,
+      "bin_high": 0.7000000000000001,
+      "count": 886,
+      "mean_predicted": 0.6463788756533078,
+      "observed_rate": 0.11851015801354402
+    },
+    {
+      "bin_low": 0.7000000000000001,
+      "bin_high": 0.8,
+      "count": 687,
+      "mean_predicted": 0.7497844959797644,
+      "observed_rate": 0.17467248908296942
+    },
+    {
+      "bin_low": 0.8,
+      "bin_high": 0.9,
+      "count": 428,
+      "mean_predicted": 0.8397210504964133,
+      "observed_rate": 0.2897196261682243
+    },
+    {
+      "bin_low": 0.9,
+      "bin_high": 1.0,
+      "count": 1199,
+      "mean_predicted": 0.9959360625069772,
+      "observed_rate": 0.9774812343619683
+    }
+  ],
+  "reliability_platt": [
+    {
+      "bin_low": 0.0,
+      "bin_high": 0.1,
+      "count": 15633,
+      "mean_predicted": 0.008129361105376758,
+      "observed_rate": 0.008507644086227851
+    },
+    {
+      "bin_low": 0.1,
+      "bin_high": 0.2,
+      "count": 1417,
+      "mean_predicted": 0.14179476225211687,
+      "observed_rate": 0.11432604093154553
+    },
+    {
+      "bin_low": 0.2,
+      "bin_high": 0.30000000000000004,
+      "count": 615,
+      "mean_predicted": 0.24454375811504583,
+      "observed_rate": 0.2048780487804878
+    },
+    {
+      "bin_low": 0.30000000000000004,
+      "bin_high": 0.4,
+      "count": 274,
+      "mean_predicted": 0.34221313538303905,
+      "observed_rate": 0.26277372262773724
+    },
+    {
+      "bin_low": 0.4,
+      "bin_high": 0.5,
+      "count": 101,
+      "mean_predicted": 0.4429270740566283,
+      "observed_rate": 0.3564356435643564
+    },
+    {
+      "bin_low": 0.5,
+      "bin_high": 0.6000000000000001,
+      "count": 39,
+      "mean_predicted": 0.5473086112888768,
+      "observed_rate": 0.46153846153846156
+    },
+    {
+      "bin_low": 0.6000000000000001,
+      "bin_high": 0.7000000000000001,
+      "count": 5,
+      "mean_predicted": 0.6352760718553274,
+      "observed_rate": 0.8
+    },
+    {
+      "bin_low": 0.7000000000000001,
+      "bin_high": 0.8,
+      "count": 3,
+      "mean_predicted": 0.7240538439156848,
+      "observed_rate": 1.0
+    },
+    {
+      "bin_low": 0.8,
+      "bin_high": 0.9,
+      "count": 4,
+      "mean_predicted": 0.8604536199520856,
+      "observed_rate": 0.75
+    },
+    {
+      "bin_low": 0.9,
+      "bin_high": 1.0,
+      "count": 1139,
+      "mean_predicted": 0.9987566716189433,
+      "observed_rate": 1.0
+    }
+  ],
+  "note": "Calibration set (last 15% of train.csv) also drove early stopping; calibration quality is judged on the untouched test set."
+}

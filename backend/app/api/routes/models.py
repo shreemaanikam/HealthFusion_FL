@@ -116,3 +116,14 @@ async def get_model(model_id: str):
             return m
     from fastapi import HTTPException
     raise HTTPException(status_code=404, detail=f"Model '{model_id}' not found.")
+
+import json
+from pathlib import Path
+
+@router.get("/validation_report")
+async def get_validation_report():
+    report_path = Path("reports/model_validation/model_validation_summary.json")
+    if not report_path.exists():
+        return {}
+    with open(report_path) as f:
+        return json.load(f)

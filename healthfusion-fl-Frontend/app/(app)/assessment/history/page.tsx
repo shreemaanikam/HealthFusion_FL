@@ -29,7 +29,7 @@ export default function AssessmentHistoryPage() {
         description={
           DEMO_MODE
             ? "Every assessment run in this organization, most recent first."
-            : "Assessments you've run in this browser tab this session, most recent first — HealthFusion_FL's current API doesn't yet persist a server-side history across sessions or providers."
+            : "Every clinical assessment associated with your account, most recent first."
         }
       />
       <div className="p-6">
