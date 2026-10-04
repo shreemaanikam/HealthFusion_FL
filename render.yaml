@@ -55,7 +55,7 @@ services:
       # --- CORS: set to the real Vercel frontend origin(s) in the dashboard ---
       # e.g. https://your-project.vercel.app  (no trailing slash, no localhost in prod)
       - key: CORS_ORIGINS
-        sync: false
+        value: "https://healthfusionflfrontend.vercel.app"
 
       # --- OpenRouter (optional — set in Render dashboard as a Secret) ---
       - key: OPENROUTER_API_KEY
