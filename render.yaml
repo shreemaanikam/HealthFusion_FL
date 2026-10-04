@@ -4,9 +4,9 @@
 # Deploy: Connect GitHub repo at https://render.com → New → Blueprint
 # This spec provisions:
 #   1. A Python web service (FastAPI backend)
-#   2. A managed PostgreSQL database (Render free tier)
 #
 # ⚠️  Before deploying, set these secrets in the Render dashboard:
+#     DATABASE_URL (Supabase Session Pooler URL, port 5432)
 #     JWT_SECRET_KEY
 #     OPENROUTER_API_KEY (optional)
 #
@@ -40,11 +40,9 @@ services:
       - key: LOG_LEVEL
         value: INFO
 
-      # --- Database (Render auto-injects DATABASE_URL from the postgres service) ---
+      # --- Database ---
       - key: DATABASE_URL
-        fromDatabase:
-          name: healthfusion-db
-          property: connectionString
+        sync: false   # Set manually in dashboard (Supabase Session Pooler URL)
 
       # --- Authentication (set JWT_SECRET_KEY in Render dashboard as a Secret) ---
       - key: JWT_ALGORITHM
@@ -80,9 +78,3 @@ services:
         value: "false"
       - key: DP_EPSILON
         value: "1.0"
-
-databases:
-  - name: healthfusion-db
-    databaseName: healthfusion
-    user: healthfusion
-    plan: free   # Render free PostgreSQL (90 days, then upgrade or recreate)

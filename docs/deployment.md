@@ -17,7 +17,7 @@ Browser ──HTTPS──▶ Vercel (Next.js frontend)
                    ├─ SHAP explainability
                    ├─ Federated learning (SIMULATION)
                    ├─ OpenRouter (optional, server-side)
-                   └─ PostgreSQL (Render managed)
+                   └─ PostgreSQL (Supabase Session Pooler)
 ```
 
 | Name | Value |
@@ -30,8 +30,9 @@ Users only ever need `PUBLIC_URL`. A custom domain can be attached later in eith
 ## 1. Deploy the backend (Render)
 
 1. Push the repo to GitHub (`shreemaanikam/HealthFusion_FL`).
-2. Render → **New → Blueprint** → select the repo. Render reads [`render.yaml`](../render.yaml) and creates the web service + PostgreSQL database.
+2. Render → **New → Blueprint** → select the repo. Render reads [`render.yaml`](../render.yaml) and creates the web service.
 3. In the service's **Environment** tab, set the values marked `sync: false`:
+   - `DATABASE_URL` — Supabase PostgreSQL connection string using the **Session Pooler** on port 5432.
    - `JWT_SECRET_KEY` — `python -c "import secrets; print(secrets.token_urlsafe(48))"`
    - `CORS_ORIGINS` — your Vercel URL, e.g. `https://your-project.vercel.app`
    - `OPENROUTER_API_KEY` — optional
@@ -65,7 +66,7 @@ Backend (see [`.env.example`](../.env.example)):
 | `APP_ENV` | `production` |
 | `DEBUG` | `false` |
 | `DEMO_MODE` | `false` |
-| `DATABASE_URL` | injected by Render from the managed database |
+| `DATABASE_URL` | Supabase Session Pooler connection string (dashboard only) |
 | `JWT_SECRET_KEY` | strong random secret (dashboard only) |
 | `CORS_ORIGINS` | real frontend HTTPS origin(s) only |
 | `OPENROUTER_API_KEY` / `OPENROUTER_MODEL` | optional |
@@ -74,11 +75,15 @@ Frontend (see [`.env.local.example`](../healthfusion-fl-Frontend/.env.local.exam
 
 ## 4. Database
 
-- Development: SQLite (`sqlite:///./healthfusion.db`).
-- Production: PostgreSQL. `postgres://` / `postgresql://` URLs are converted to `postgresql+asyncpg://` automatically.
-- Tables are created idempotently at startup (`init_db`). **Alembic migrations are not set up yet** — schema changes to an existing production database need a manual migration. Known limitation.
+- Database provider: Supabase PostgreSQL
+- Connection method: Session Pooler (port 5432)
+- DATABASE_URL is configured only in the hosting provider. Database credentials must never be committed.
+- Render PostgreSQL is no longer used.
+- Supabase project URL is not the same thing as DATABASE_URL.
+- Production frontend must never receive DATABASE_URL.
+- `postgres://` / `postgresql://` URLs are converted to `postgresql+asyncpg://` automatically.
+- Tables are created idempotently at startup (`init_db`). **Alembic migrations are not set up yet** — schema changes to an existing production database need a manual migration.
 - Only application data (users, organizations, audit, model metadata) is stored. No hospital datasets are uploaded.
-- Render's free PostgreSQL instance expires after a limited period; back up or upgrade for anything beyond a demo.
 
 ## 5. OpenRouter
 

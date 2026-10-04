@@ -90,8 +90,8 @@ None — all critical items have known fixes.
 | Layer | Choice | Reason |
 |-------|--------|--------|
 | Frontend | **Vercel** | Native Next.js support, free tier, zero config |
-| Backend | **Render** | Native Python/FastAPI support, free web service + PostgreSQL |
-| Database | **Render PostgreSQL** | Free tier, same platform as backend |
+| Backend | **Render** | Native Python/FastAPI support, free web service |
+| Database | **Supabase PostgreSQL** | Free tier, Session Pooler |
 | Model | **Git bundle** | 92 KB .keras file — tiny, safe to track via `.gitignore` exception |
 | LLM | **OpenRouter** | Already integrated; key from Render env var |
 
