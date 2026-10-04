@@ -1,327 +1,148 @@
 # HealthFusion_FL
 
-## Explainable Adaptive Federated Healthcare Intelligence Framework
+**HealthFusion_FL is a privacy-preserving healthcare AI research prototype combining machine-learning prediction, Explainable AI, and federated-learning simulation into a deployed web platform.**
 
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.16+-orange.svg)](https://tensorflow.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-green.svg)](https://fastapi.tiangolo.com)
-[![Flower](https://img.shields.io/badge/Flower-1.23+-purple.svg)](https://flower.ai)
-[![License](https://img.shields.io/badge/License-Academic%20Research-lightgrey.svg)](LICENSE)
+## 🚀 Live Demo
 
----
+- **Live Frontend (Vercel):** [https://healthfusionflfrontend.vercel.app](https://healthfusionflfrontend.vercel.app)
+- **Live Backend (Render):** [https://healthfusion-fl-backend.onrender.com/api/health](https://healthfusion-fl-backend.onrender.com/api/health)
 
-## Overview
-
-**HealthFusion_FL** is a privacy-preserving, federated intelligence framework engineered for clinical risk prediction. It addresses critical healthcare informatics challenges: multi-institutional data silos, data heterogeneity across clinical centers, class imbalance, and model interpretability.
-
-The framework unites:
-- **Centralized & Federated Deep Learning**: TensorFlow/Keras neural networks with class-weight handling and Flower-based distributed training.
-- **Explainable AI (XAI)**: SHAP (SHapley Additive exPlanations) providing verifiable, zero-hallucination feature attributions.
-- **Adaptive Aggregation**: An objective multi-factor weighting strategy (`AdaptiveFedAvg`) that counteracts client drift and institutional data imbalance.
-- **Privacy & Governance**: Strict data locality guarantees, differential privacy mechanisms, and tamper-evident audit trails.
-- **Clinical Decision Support**: Deterministic rule-based insights augmented by an optional OpenRouter LLM plain-language explanation layer.
-
-> **Clinical Disclaimer:** HealthFusion_FL is an academic research and clinical decision support prototype. All outputs represent **model-predicted risk assessments**, **NOT** definitive medical diagnoses.
+*(Note: The live backend is hosted on a free Render tier and may take 30-60 seconds to cold start if inactive.)*
 
 ---
 
-## System Architecture
+## 🛠️ Architecture & Technology Stack
 
-```
-                        HealthFusion_FL
-                              │
-            ┌─────────────────┼──────────────────┐
-            │                 │                  │
-       Prediction        Explainability      AI Insight
-        Service             Service            Service
-            │                 │                  │
-       TensorFlow           SHAP            OpenRouter
-       /Keras NN                             (optional)
-            │
-            ▼
-    Federated Learning
-    (Flower Framework)
-            │
-     ┌──────┼──────┐
-     │      │      │
-   Hosp A  Hosp B  Hosp C
-   (client) (client) (client)
-     │      │      │
-     └──────┼──────┘
-            │
-   Adaptive Aggregation
-   (Performance-weighted)
-            │
-            ▼
-       Global Model
-            │
-            ▼
-  Privacy + Audit + Governance
-  (DP, Data Locality, Audit Log)
-            │
-            ▼
-       FastAPI Backend
-            │
-       ┌────┼────┐
-       │         │
-    SQLite    PostgreSQL
-    (dev)      (prod)
-```
+HealthFusion_FL is designed as a secure, distributed system targeting healthcare compliance paradigms. 
+
+### Frontend / Client (Next.js)
+- **Framework:** Next.js 14 (App Router) + React
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel (Edge-optimized)
+
+### Backend / API (FastAPI)
+- **Framework:** FastAPI (Python 3.12)
+- **Database:** Supabase PostgreSQL (via Session Pooler) + SQLAlchemy ORM
+- **Security:** JWT Authentication + Role-Based Access Control (RBAC)
+- **Deployment:** Dockerized on Render
+
+### AI / ML & Federated Learning
+- **Prediction Model:** TensorFlow / Keras (Multi-layer perceptron)
+- **Explainable AI (XAI):** SHAP (KernelExplainer/TreeExplainer)
+- **Federated Learning:** Flower (Flwr) simulation framework
+- **Generative Insights:** OpenRouter API (LLM integration)
 
 ---
 
-## Current Capabilities
+## 🧩 Core Features & Feature Status
 
-### 1. Deep Learning Risk Prediction
-- **Architecture**: Feedforward Neural Network with Batch Normalization and Dropout regularization (`Input(8) → Dense(64, ReLU) → BN → Dropout(0.3) → Dense(32, ReLU) → BN → Dropout(0.2) → Dense(16, ReLU) → Dense(1, Sigmoid)`).
-- **Optimization**: Adam optimizer, binary cross-entropy loss, class weighting for severe class imbalance (~91.5% non-diabetic vs ~8.5% diabetic), EarlyStopping on validation AUC.
-- **Empirical Centralized Performance**: **87.51% Accuracy**, **0.9776 ROC-AUC**, **0.865 PR-AUC** on held-out test data.
+To accurately reflect the current state of this research prototype, subsystems are classified by their deployment reality:
 
-### 2. Explainable AI (SHAP)
-- **Local Explanations**: Sample-level SHAP values ($\phi_i$) quantifying exact positive and negative feature contributions toward individual predictions.
-- **Global Explanations**: Population-level mean absolute SHAP importance ranks (`HbA1c_level` > `blood_glucose_level` > `bmi` > `age`).
-- **Explainers**: `KernelExplainer` (with k-means/sampled background baselines) for neural networks and `TreeExplainer` for ensemble baselines.
-- **Zero-Hallucination Design**: Attributions are mathematically grounded in cooperative game theory, never fabricated.
-
-### 3. Federated Learning & Client Simulation
-- **Framework**: Flower (`flwr`) in-process simulation engine supporting multi-client federated training without requiring distributed network orchestration.
-- **Hospital Nodes**: Configured for 3 clinical centers (`Hospital_A`, `Hospital_B`, `Hospital_C`).
-- **Data Partitioning**:
-  - *IID Uniform*: Equal size and balanced label distributions across all clients.
-  - *Non-IID Label Skew*: Dirichlet distribution modeling disease prevalence disparity (e.g. specialized diabetic clinics vs general care).
-  - *Non-IID Quantity Skew*: Hospital volume variations (50% / 30% / 20%).
-  - *Non-IID Feature Skew*: Demographic distribution skew by patient age cohorts.
-
-### 4. Adaptive Aggregation (`AdaptiveFedAvg`)
-- Standard FedAvg weights clients solely by sample volume ($w_k = n_k / N$), making it vulnerable to low-quality data and non-IID drift.
-- `AdaptiveFedAvg` dynamically computes institutional weights based on:
-  $$\tilde{w}_k = 0.40 \cdot \mathcal{P}_k + 0.30 \cdot \mathcal{S}_k + 0.20 \cdot \mathcal{V}_k + 0.10 \cdot \mathcal{R}_k$$
-  Where $\mathcal{P}_k$ is validation performance, $\mathcal{S}_k$ is sample volume, $\mathcal{V}_k$ is gradient stability, and $\mathcal{R}_k$ is historical reliability.
-- Bounded to $[0.10, 0.60]$ and normalized to $\sum w_k = 1.0$ to prevent institutional dominance.
-
-### 5. Privacy & Data Governance
-- **Data Locality (ACTIVE)**: Raw clinical data remains strictly on client nodes. Zero patient records leave the local node; only model parameter updates ($\Delta W$) are transmitted.
-- **Differential Privacy (SIMULATION)**: Gaussian noise mechanism with bounded gradient clipping ($\Delta S$) calibrated to $(\epsilon, \delta)$ privacy budgets:
-  $$\sigma = \frac{\Delta S \cdot \sqrt{2 \ln(1.25/\delta)}}{\epsilon}$$
-- **Audit Logging (ACTIVE)**: Immutable event logging capturing timestamped user actions, model predictions, and federated rounds with tenant organization scoping.
-
-### 6. Clinical Decision Support & AI Insights
-- **Deterministic Insight Engine**: Rule-based clinical triage mapping blood glucose, HbA1c, and comorbidities to clinical screening recommendations.
-- **OpenRouter LLM Integration**: Plain-language, patient-oriented explanation summaries using conversational models (e.g. `qwen/qwen3.8-27b:free`).
-- **Defensive Safeguards**: Strict system prompts enforcing non-diagnostic terminology, zero PHI transmission, and automatic fallback to structured deterministic insights if external APIs are unreachable or throttled.
-
-### 7. Enterprise Backend Architecture
-- **FastAPI Async Core**: High-throughput asynchronous endpoints with Pydantic v2 input validation.
-- **Relational Storage**: Async SQLAlchemy supporting SQLite (local development) and PostgreSQL (production).
-- **Authentication & RBAC**: Stateless JWT authentication enforcing 4 clinical roles: `DOCTOR`, `HOSPITAL_ADMIN`, `RESEARCHER`, and `SYSTEM_ADMIN`.
+- **Authentication & RBAC:** **ACTIVE** (JWT, strict roles: Doctor, Admin, Researcher)
+- **PostgreSQL Database:** **ACTIVE** (Supabase Session Pooler)
+- **TensorFlow Inference:** **ACTIVE** (Deployed on Render CPU compute)
+- **SHAP Explainability:** **ACTIVE** (Local feature contributions computed on the fly)
+- **Generative AI Insights:** **ACTIVE / OPTIONAL** (Falls back to deterministic insights if OpenRouter is unavailable)
+- **Federated Learning:** **SIMULATION** (Runs locally via Flower to simulate hospital nodes, not actively aggregating live web traffic)
+- **Differential Privacy:** **SIMULATION** (Algorithmically modeled but not actively distorting live user gradients)
+- **Secure Aggregation:** **PLANNED** (Architectural provision made, not fully implemented)
 
 ---
 
-## Feature Status: Active vs. Simulation
+## 🔒 Privacy & Security Mechanisms
 
-> **Transparency Note:** In compliance with ethical healthcare software practices, HealthFusion_FL maintains rigorous honesty regarding module operational readiness.
-
-| Feature / Subsystem | Operational Status | Current Implementation Details |
-| :--- | :---: | :--- |
-| **TensorFlow Risk Prediction** | **ACTIVE** | Centralized neural network trained, saved, and serving predictions via REST API |
-| **SHAP Explainability** | **ACTIVE** | Real-time computation of local and global feature importance |
-| **FastAPI Backend Core** | **ACTIVE** | 10 modular route controllers operational with async request handling |
-| **JWT Authentication & RBAC** | **ACTIVE** | Role-based permission guards active across clinical endpoints |
-| **Multi-Tenancy** | **ACTIVE** | Organization and user partitioning with isolated scopes |
-| **Audit Logging** | **ACTIVE** | Async database event tracking for authentication, predictions, and admin actions |
-| **Data Locality Enforcement** | **ACTIVE** | Training pipelines enforce parameter-only exchange; raw data ingestion is localized |
-| **Federated Learning (Flower)** | **SIMULATION** | Multi-hospital in-process simulation (`flwr.simulation`); non-networked local processes |
-| **Adaptive Aggregation** | **SIMULATION** | `AdaptiveFedAvg` strategy tested in simulation; not deployed across remote hospital networks |
-| **Differential Privacy** | **SIMULATION** | Noise generation and clipping formulas implemented and validated; simulated gradient perturbance |
-| **OpenRouter AI Explanation** | **ACTIVE** | Operational when `OPENROUTER_API_KEY` is provided; transparent fallback when unavailable |
-| **Secure Aggregation** | **PLANNED** | Cryptographic multi-party computation / secret sharing architecture documented for future release |
+1. **Role-Based Access Control:** Clinical predictions require a `DOCTOR` role. System management requires `SYSTEM_ADMIN`.
+2. **Data Locality:** By design (in the FL architecture), raw patient data never leaves the hospital node.
+3. **Audit Logging:** Immutable audit trails record when predictions are made and by whom.
+4. **No Silent Fallbacks:** The production frontend strictly connects to the live backend without falling back to local/demo data (`NEXT_PUBLIC_DEMO_MODE=false`).
 
 ---
 
-## Local Setup
+## 💻 Local Development
 
-### Prerequisites
-- **Python**: Version **3.12** (TensorFlow 2.16+ is not compatible with Python 3.14+)
-- **Git**
-- **Operating System**: macOS, Linux, or Windows (WSL recommended)
-
-### Step-by-Step Installation
-
+### 1. Backend Setup
 ```bash
-# 1. Clone the repository
 git clone https://github.com/shreemaanikam/HealthFusion_FL.git
 cd HealthFusion_FL
 
-# 2. Create and activate a Python 3.12 virtual environment
-python3.12 -m venv .venv
-source .venv/bin/activate       # On Windows: .venv\Scripts\activate
-
-# 3. Upgrade pip and install all project dependencies
-pip install --upgrade pip
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
-# 4. Configure environment variables
 cp .env.example .env
-# Edit .env to set your SECRET_KEY, JWT_SECRET_KEY, and optional OPENROUTER_API_KEY
-```
-
-### Running the Backend Server
-
-```bash
-# Option A: Start using the main runner (recommended)
+# Set SQLite or local Postgres in .env
 python main.py
-
-# Option B: Run uvicorn directly
-uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
 ```
+Backend runs at `http://localhost:8000`.
 
-The server boots at `http://localhost:8000`.
-
-### Executing the ML & Federated Learning Pipelines
-
+### 2. Frontend Setup
 ```bash
-# Centralized data preprocessing
-python -m src.ml.preprocessing
+cd healthfusion-fl-Frontend
+npm install
+cp .env.example .env.local
+# Set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+npm run dev
+```
+Frontend runs at `http://localhost:3000`.
 
-# Train the centralized TensorFlow neural network
+### 3. ML / Federated Pipeline
+```bash
+# Centralized training
 python -m src.ml.train_tensorflow
 
-# Evaluate model metrics, calibration, and fairness
-python -m src.ml.evaluate_tensorflow
-
-# Run the 3-hospital Federated Learning simulation (IID or Non-IID)
+# Federated Learning simulation
 python -m src.federated.runner
 ```
 
-### Running the Test Suite
+---
 
-```bash
-# Run all unit and integration tests (24 tests)
-pytest
+## 🌐 Production Deployment Summary
 
-# Run tests with coverage analysis
-pytest --cov=src --cov=backend
+- **Frontend:** Deployed statically to Vercel. Connects securely to the Render backend. Environment variables hide demo-mode switches.
+- **Backend:** Deployed as a Docker web service on Render.
+- **Database:** Supabase PostgreSQL handles relational data (Users, Models, Audit Logs, Organizations).
+- **CORS:** Strictly limited to the exact Vercel origin. No wildcards or localhost allowed in production.
 
-# Run specific test suites
-pytest tests/unit/
-pytest tests/integration/
-```
-
-### Docker Deployment
-
-```bash
-# Build and run backend container
-docker-compose up --build
-
-# Run in detached daemon mode
-docker-compose up -d
-```
+For exhaustive deployment instructions, see [`docs/deployment.md`](docs/deployment.md).
 
 ---
 
-## API Documentation Location
-
-When the backend server is running, interactive and machine-readable documentation is accessible at:
-
-| Documentation Interface | URL | Description |
-| :--- | :--- | :--- |
-| **Interactive Swagger UI** | [http://localhost:8000/docs](http://localhost:8000/docs) | OpenAPI interactive explorer to test live requests |
-| **ReDoc UI** | [http://localhost:8000/redoc](http://localhost:8000/redoc) | Clean, searchable reference documentation |
-| **OpenAPI Schema (JSON)** | [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json) | Raw OpenAPI 3.1 specification |
-| **Frontend Integration Contract** | [`docs/frontend_api_contract.md`](docs/frontend_api_contract.md) | Exhaustive integration contract with request/response schemas, auth flows, and error contracts |
-
-### Key API Endpoints Overview
-
-| Method | Endpoint | Access Level | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Public | Liveness probe and subsystem status |
-| `POST` | `/api/users/register` | Public | Register new clinician or researcher |
-| `POST` | `/api/users/login` | Public | Authenticate and obtain JWT token |
-| `GET` | `/api/users/me` | Authenticated | Retrieve current user profile |
-| `POST` | `/api/prediction` | `DOCTOR`+ | Submit 8 clinical features to receive model risk assessment |
-| `POST` | `/api/explainability` | `DOCTOR`+ | Compute local SHAP attributions for prediction |
-| `POST` | `/api/insights/generate` | `DOCTOR`+ | Generate clinical triage insights & plain-language summary |
-| `GET` | `/api/federated/status` | `RESEARCHER`+ | Query current federated round, strategy, and participants |
-| `POST` | `/api/federated/train` | `SYSTEM_ADMIN` | Trigger federated aggregation cycle |
-| `GET` | `/api/privacy/status` | `SYSTEM_ADMIN` | Audit privacy engine status and cumulative $\epsilon$ budget |
-| `GET` | `/api/audit/logs` | `HOSPITAL_ADMIN`+ | Query tenant-scoped audit trails |
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 HealthFusion_FL/
-├── src/
-│   ├── ml/                    # ML pipeline (TF model, preprocessing, training, evaluation)
-│   ├── federated/             # Flower FL (server, client, strategy, runner)
-│   │   ├── partitioning/      # IID and non-IID data distribution strategies
-│   │   └── adaptive_aggregation/  # Performance-weighted AdaptiveFedAvg
-│   ├── explainability/        # SHAP explainers (local and global)
-│   ├── privacy/               # Differential privacy, data locality monitor
-│   └── monitoring/            # Data and prediction drift detection
-├── backend/
-│   └── app/                   # FastAPI application
-│       ├── api/routes/        # 10 modular route controllers
-│       ├── services/          # Business logic services
-│       ├── schemas/           # Pydantic v2 schemas
-│       ├── models/            # SQLAlchemy database models
-│       └── core/              # Security, database connection, structured logging
-├── data/
-│   ├── raw/                   # Sample data (sample_data.csv) & Kaggle download directory
-│   ├── processed/             # Preprocessed train/test partitions
-│   └── federated/             # Local client partitions (Hospital A/B/C)
-├── docs/                      # 10 comprehensive technical specifications
-│   ├── architecture.md        # System topology and data flow
-│   ├── frontend_api_contract.md # Frontend consumption contract
-│   ├── ml_pipeline.md         # Ingestion, architecture, evaluation
-│   ├── federated_learning.md  # Distributed learning design
-│   ├── explainability.md      # SHAP integration and math
-│   ├── adaptive_aggregation.md# Multi-factor weighting formula
-│   ├── privacy.md             # Data locality & DP mechanics
-│   ├── security.md            # Auth, RBAC, headers, secrets
-│   ├── deployment.md          # Cloud & container setup
-│   └── data_setup.md          # Dataset acquisition instructions
-├── models/                    # Model artifact directories
-├── reports/                   # Performance records & experiment comparisons
-├── tests/                     # 24 unit & integration tests
-├── .env.example               # Environment variable blueprint
-├── .gitignore                 # Exclusion rules protecting secrets and binaries
-├── Dockerfile                 # Multi-stage production container
-├── docker-compose.yml         # Container orchestration
-├── main.py                    # Server launch script
-├── pytest.ini                 # Test runner configuration
-└── requirements.txt           # Pinned dependency requirements
+├── healthfusion-fl-Frontend/ # Next.js Vercel Frontend
+├── backend/                  # FastAPI Application
+├── src/                      # ML, Federated Learning, and Explainability logic
+├── docs/                     # Technical specifications and Evidence
+├── models/                   # Serialized TensorFlow models
+├── data/                     # Local datasets (ignored in git)
+├── tests/                    # Backend test suite (pytest)
+└── requirements.txt          # Python dependencies
 ```
 
 ---
 
-## Technical Documentation Suite
+## 🧪 Testing & Verification
 
-For comprehensive deep dives into specific submodules, consult the [`docs/`](docs/) directory:
-
-- [System Architecture](docs/architecture.md)
-- [Frontend API Contract](docs/frontend_api_contract.md)
-- [Machine Learning Pipeline](docs/ml_pipeline.md)
-- [Federated Learning Specification](docs/federated_learning.md)
-- [Explainability & SHAP](docs/explainability.md)
-- [Adaptive Aggregation Formulation](docs/adaptive_aggregation.md)
-- [Privacy Architecture](docs/privacy.md)
-- [Security & Access Control](docs/security.md)
-- [Deployment & Free-Tier Hosting](docs/deployment.md)
-- [Dataset Setup & Kaggle Guide](docs/data_setup.md)
-- [Research Experiments Protocol](docs/research_experiments.md)
+The repository enforces strict continuous integration standards:
+- **Backend:** `pytest` suite ensuring robust RBAC and endpoint contracts (60+ tests).
+- **Frontend:** Jest suite covering React components and API client integrations (69 tests). TypeScript strictly type-checked.
+- **Security:** Static secrets scans and live-CORS enforcement.
 
 ---
 
-## Dataset & Licensing
+## ⚠️ Limitations & Responsible-Use Disclaimer
 
-- **Dataset**: [Diabetes Prediction Dataset (Kaggle)](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset) — 100,000 anonymized clinical records.
-- **License**: Public Domain (CC0).
-- **Repository Policy**: Raw full-size datasets and trained binary artifacts are excluded to keep the repository lightweight and adhere to reproducible data governance. Download instructions are provided in [`docs/data_setup.md`](docs/data_setup.md). A 100-row stratified sample is included at `data/raw/sample_data.csv` for immediate testing.
+**This is a research prototype, not a certified medical device.**
+- **No Medical Diagnosis:** Predictions generated by the system are experimental and must not be used for actual clinical decision-making.
+- **No Real Patient Data:** The live system uses synthetic testing data. The underlying model was trained on an anonymized public Kaggle dataset.
+- **Not HIPAA Compliant:** While architected with privacy in mind, this specific deployment has not undergone formal compliance auditing or certification.
+- **Federated Simulation:** The federated learning aspect is a simulation demonstrating feasibility, not a distributed network of real hospital servers.
 
 ---
 
-## Authors & Acknowledgments
+## 📄 License
 
-HealthFusion_FL Research & Development Team. Built for secure, explainable, and decentralized healthcare intelligence.
+This project is intended for academic research and portfolio demonstration. See [LICENSE](LICENSE) (if applicable) for terms of use.
