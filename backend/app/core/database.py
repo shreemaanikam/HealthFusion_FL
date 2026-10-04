@@ -74,3 +74,14 @@ async def init_db():
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            from sqlalchemy import text
+            # Safe migration for google_sub
+            await conn.execute(text("ALTER TABLE users ADD COLUMN google_sub VARCHAR"))
+        except Exception:
+            pass
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("CREATE UNIQUE INDEX ix_users_google_sub ON users (google_sub)"))
+        except Exception:
+            pass

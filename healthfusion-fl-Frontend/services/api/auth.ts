@@ -33,6 +33,31 @@ export async function login(input: LoginRequest): Promise<AuthUser> {
   return me;
 }
 
+export async function googleLogin(credential: string): Promise<AuthUser> {
+  if (DEMO_MODE) throw new Error("googleLogin() is a live-mode-only call.");
+
+  const tokenRes = await apiFetch<{ accessToken: string; tokenType: string }>("/api/users/google", {
+    method: "POST",
+    body: JSON.stringify({ credential }),
+  });
+
+  if (tokenRes.accessToken) {
+    setToken(tokenRes.accessToken);
+  }
+
+  const me = await getMe();
+  if (!me) throw new ApiError("Authentication succeeded but user profile could not be loaded.", 401);
+  return me;
+}
+
+export async function register(input: any): Promise<void> {
+  if (DEMO_MODE) throw new Error("register() is a live-mode-only call.");
+  await apiFetch("/api/users/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 /** GET /api/users/me — returns null when there's no active session. */
 export async function getMe(): Promise<AuthUser | null> {
   if (DEMO_MODE) return null;

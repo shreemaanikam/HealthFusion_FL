@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     "Privacy-preserving clinical intelligence for distributed healthcare environments.",
 };
 
+import { GoogleProvider } from "@/providers/GoogleProvider";
+
 export default function RootLayout({
   children,
 }: {
@@ -24,7 +26,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-body">{children}</body>
+      <body className="font-body">
+        <GoogleProvider>
+          {children}
+        </GoogleProvider>
+      </body>
     </html>
   );
 }

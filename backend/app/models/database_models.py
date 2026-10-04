@@ -18,6 +18,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    google_sub = Column(String, unique=True, index=True, nullable=True)
     full_name = Column(String)
     role = Column(Enum(RoleEnum), default=RoleEnum.DOCTOR)
     organization_id = Column(Integer, ForeignKey("organizations.id"))

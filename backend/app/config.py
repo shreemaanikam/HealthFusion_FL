@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: Optional[str] = None
     OPENROUTER_MODEL: str = "qwen/qwen3.8-27b:free"
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    
+    # ----- Google Auth -----
+    GOOGLE_CLIENT_ID: Optional[str] = None
 
     # ----- Federated Learning -----
     FEDERATION_MODE: str = "iid"

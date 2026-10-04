@@ -15,8 +15,9 @@ from app.core.security import (
     RoleEnum,
 )
 from app.models.database_models import User, Organization
-from app.schemas.schemas import UserCreate, UserResponse, UserLogin, TokenResponse
+from app.schemas.schemas import UserCreate, UserResponse, UserLogin, TokenResponse, GoogleAuthRequest
 from app.config import get_settings
+from app.services.google_auth_service import verify_google_token
 
 settings = get_settings()
 router = APIRouter(tags=["Users"])
@@ -108,3 +109,62 @@ async def get_me(current_user: User = Depends(get_current_user)):
         is_active=current_user.is_active,
         created_at=current_user.created_at,
     )
+
+
+@router.post("/google", response_model=TokenResponse)
+async def google_login(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
+    """Authenticate with Google Identity Services.
+    
+    Verifies the Google ID token server-side, links to an existing user by email
+    or google_sub, or creates a new DOCTOR account.
+    """
+    idinfo = verify_google_token(payload.credential)
+    email = idinfo.get("email")
+    google_sub = idinfo.get("sub")
+    full_name = idinfo.get("name", "")
+
+    if not email or not google_sub:
+        raise HTTPException(status_code=400, detail="Google token missing email or subject.")
+
+    # 1. Try to find user by google_sub
+    result = await db.execute(select(User).where(User.google_sub == google_sub))
+    user = result.scalars().first()
+
+    # 2. If not found by sub, try to find by email
+    if not user:
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalars().first()
+
+        if user:
+            # Link the account
+            user.google_sub = google_sub
+            await db.commit()
+
+    # 3. If still not found, create new DOCTOR account
+    if not user:
+        # Generate a random password for OAuth-created accounts since they won't use it
+        import secrets
+        import string
+        alphabet = string.ascii_letters + string.digits
+        random_pwd = ''.join(secrets.choice(alphabet) for i in range(32))
+        
+        user = User(
+            email=email,
+            hashed_password=get_password_hash(random_pwd),
+            full_name=full_name,
+            role=RoleEnum.DOCTOR,
+            google_sub=google_sub,
+            is_active=True,
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled.")
+
+    access_token = create_access_token(
+        data={"sub": user.email, "role": user.role.value},
+        expires_delta=timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return TokenResponse(access_token=access_token, token_type="bearer")

@@ -49,3 +49,20 @@ The Next.js 14 frontend is deployed on Vercel.
 
 - **Backend:** Pushes to the `main` branch trigger automated Render Docker builds. If a deployment fails, Render automatically aborts the rollout, keeping the previous container alive.
 - **Frontend:** Vercel automatically creates preview deployments for Pull Requests. Pushes to `main` update the production alias.
+
+## 4. Google Authentication (Identity Services)
+
+To enable "Continue with Google" sign-in:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project or select an existing one.
+3. Navigate to **APIs & Services > Credentials**.
+4. Create an **OAuth 2.0 Client ID** (Web application type).
+5. **Authorized JavaScript origins**:
+   - `http://localhost:3000` (for local development)
+   - `https://healthfusionflfrontend.vercel.app` (for production)
+6. Copy the Client ID and set it as an environment variable in both environments:
+   - **Render Backend**: Add `GOOGLE_CLIENT_ID=<your-client-id>`
+   - **Vercel Frontend**: Add `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<your-client-id>`
+
+*(Note: Ensure the exact URL, with no trailing slash, is in Authorized JavaScript origins to avoid `origin_mismatch` errors.)*

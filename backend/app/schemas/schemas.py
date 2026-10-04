@@ -214,3 +214,6 @@ class SystemStatusResponse(BaseModel):
     federated_status: str
     database_status: str
     services: Dict[str, str]
+
+class GoogleAuthRequest(BaseModel):
+    credential: str

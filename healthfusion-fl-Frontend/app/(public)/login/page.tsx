@@ -2,9 +2,11 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
 import { roleLabels } from "@/lib/role-context";
 import { DEMO_MODE } from "@/lib/demo-mode";
-import { login, ApiError } from "@/services/api/auth";
+import { login, googleLogin, ApiError } from "@/services/api/auth";
 import type { UserRole } from "@/types/user";
 import { Button } from "@/components/ui/Button";
 
@@ -73,6 +75,9 @@ function DemoLoginForm({ next }: { next: string | null }) {
         </div>
       </fieldset>
       <Button type="submit" className="w-full">Continue</Button>
+      <p className="text-center text-sm text-mist">
+        Don't have an account? <Link href="/register" className="text-navy hover:underline">Create account</Link>
+      </p>
     </form>
   );
 }
@@ -101,45 +106,88 @@ function LiveLoginForm({ next }: { next: string | null }) {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setStatus("submitting");
+    setErrorMessage(null);
+    try {
+      if (!credentialResponse.credential) throw new Error("No credential");
+      await googleLogin(credentialResponse.credential);
+      router.push(next ? `/select-organization?next=${encodeURIComponent(next)}` : "/select-organization");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage("Google Sign-In failed or was rejected by the server.");
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-      <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-ink">
-          Work email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@hospital.org"
-          className="hf-focus w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-mist"
-        />
-      </div>
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-ink">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="hf-focus w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-mist"
-        />
-      </div>
-      {status === "error" && errorMessage && (
-        <p role="alert" className="rounded border border-red bg-red-soft px-3 py-2 text-sm text-red">
-          {errorMessage}
-        </p>
+    <div className="mt-8 space-y-5">
+      {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+        <div className="flex justify-center mb-6">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              setStatus("error");
+              setErrorMessage("Google Sign-In was cancelled or failed.");
+            }}
+            useOneTap
+          />
+        </div>
       )}
-      <Button type="submit" className="w-full" disabled={status === "submitting"}>
-        {status === "submitting" ? "Signing in…" : "Sign in"}
-      </Button>
-    </form>
+      
+      {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-line" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-surface px-2 text-mist">Or continue with email</span>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-ink">
+            Work email
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@hospital.org"
+            className="hf-focus w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-mist"
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="mb-1 block text-sm font-medium text-ink">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="hf-focus w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-mist"
+          />
+        </div>
+        {status === "error" && errorMessage && (
+          <p role="alert" className="rounded border border-red bg-red-soft px-3 py-2 text-sm text-red">
+            {errorMessage}
+          </p>
+        )}
+        <Button type="submit" className="w-full" disabled={status === "submitting"}>
+          {status === "submitting" ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+
+      <p className="text-center text-sm text-mist pt-4 border-t border-line">
+        Don't have an account? <Link href="/register" className="text-navy hover:underline">Create account</Link>
+      </p>
+    </div>
   );
 }
 
@@ -158,12 +206,12 @@ function LoginForms() {
 export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-6 py-16">
-      <p className="text-sm font-medium text-teal">Sign in</p>
-      <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Access HealthFusion_FL</h1>
+      <p className="text-sm font-medium text-teal">Welcome back</p>
+      <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Sign in to HealthFusion_FL</h1>
       <p className="mt-2 text-sm text-mist">
         {DEMO_MODE
           ? "Prototype authentication — this is not a production login. Choose a role to simulate."
-          : "Signs in against the live HealthFusion_FL backend. Your role is assigned by your organization, not chosen here."}
+          : "Securely sign in to the platform."}
       </p>
       <Suspense fallback={null}>
         <LoginForms />
