@@ -85,9 +85,39 @@ export async function submitAssessment(input: AssessmentInput): Promise<Assessme
 
 export async function getAssessmentResult(id: string): Promise<AssessmentResult | undefined> {
   if (DEMO_MODE) return { ...demoAssessmentResult, id };
-  // No GET /api/assessment/:id in the contract -- this session's own log
-  // is the only place a past result can come from in live mode.
-  return getSessionResult(id);
+  
+  // First try the local session storage
+  const localResult = getSessionResult(id);
+  if (localResult) return localResult;
+  
+  try {
+    const data = await apiFetch<any>(`/api/assessments/${id}`);
+    return {
+      id: String(data.id),
+      createdAt: data.createdAt,
+      patientRef: `PT-${data.id}`,
+      input: {
+        gender: data.inputData.gender === "Female" ? "female" : "male",
+        age: data.inputData.age,
+        hypertension: data.inputData.hypertension === 1,
+        heartDisease: data.inputData.heartDisease === 1,
+        smokingHistory: data.inputData.smokingHistory,
+        bmi: data.inputData.bmi,
+        hba1cLevel: data.inputData.hba1cLevel || data.inputData.hbA1cLevel || data.inputData.HbA1c_level,
+        bloodGlucoseLevel: data.inputData.bloodGlucoseLevel
+      },
+      riskLevel: data.riskLevel,
+      probability: data.probability,
+      confidence: data.probability,
+      modelVersion: "v1.0.0",
+      featureContributions: [],
+      status: "completed",
+      source: "live"
+    };
+  } catch (err) {
+    console.error("Failed to fetch assessment result", err);
+    return undefined;
+  }
 }
 
 export async function getAssessmentHistory(): Promise<AssessmentHistoryItem[]> {
