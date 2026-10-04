@@ -16,6 +16,7 @@ services:
   - type: web
     name: healthfusion-backend
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: >
       uvicorn app.main:app
